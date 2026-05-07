@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RQA SIGNALS BOT</title>
+<link rel="shortcut icon" href="logo.png" type="image/x-icon">
+
+<style>
+:root{
+--c1:#301701;
+--c2:#A65D18;
+--c3:#934600;
+--c4:#561D00;
+--c5:#FBD449;
+--c6:#CDAE51;
+--c7:#AD6A00;
+--c8:#1E1101;
+--c9:#241A18;
+--c10:#DFD0C9;
+--c11:#D1750E;
+--c12:#ffb347;
+
+--glass:rgba(255,255,255,0.06);
+--border:rgba(255,255,255,0.12);
+--shadow:0 20px 60px rgba(0,0,0,.45);
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,sans-serif;
+}
+
+body{
+min-height:100vh;
+background:
+radial-gradient(circle at top left,var(--c2),transparent 25%),
+radial-gradient(circle at bottom right,var(--c7),transparent 25%),
+linear-gradient(135deg,var(--c1),var(--c8),#000);
+overflow-x:hidden;
+color:#fff;
+display:flex;
+justify-content:center;
+align-items:flex-start;
+padding:20px;
+position:relative;
+}
+
+body::before{
+content:'';
+position:fixed;
+inset:0;
+background:
+linear-gradient(90deg,transparent 48%,rgba(255,255,255,.02) 50%,transparent 52%),
+linear-gradient(transparent 48%,rgba(255,255,255,.02) 50%,transparent 52%);
+background-size:40px 40px;
+pointer-events:none;
+animation:gridMove 10s linear infinite;
+}
+
+@keyframes gridMove{
+0%{transform:translateY(0)}
+100%{transform:translateY(40px)}
+}
+
+.floating{
+position:fixed;
+border-radius:50%;
+filter:blur(80px);
+opacity:.25;
+z-index:-1;
+animation:float 10s ease-in-out infinite alternate;
+}
+
+.f1{
+width:240px;
+height:240px;
+background:var(--c5);
+top:-80px;
+left:-80px;
+}
+
+.f2{
+width:260px;
+height:260px;
+background:var(--c2);
+bottom:-120px;
+right:-120px;
+animation-delay:2s;
+}
+
+@keyframes float{
+0%{transform:translateY(0) translateX(0)}
+100%{transform:translateY(40px) translateX(20px)}
+}
+
+.app{
+width:100%;
+max-width:430px;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:18px;
+animation:fadeIn .8s ease;
+}
+
+@keyframes fadeIn{
+from{
+opacity:0;
+transform:translateY(30px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+.logo-wrap{
+width:110px;
+height:110px;
+border-radius:30px;
+background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.03));
+display:flex;
+justify-content:center;
+align-items:center;
+backdrop-filter:blur(18px);
+border:1px solid var(--border);
+box-shadow:var(--shadow);
+animation:pulse 3s infinite;
+overflow:hidden;
+}
+
+@keyframes pulse{
+0%,100%{transform:scale(1)}
+50%{transform:scale(1.03)}
+}
+
+.logo-wrap img{
+width:85%;
+height:85%;
+object-fit:contain;
+}
+
+.title{
+font-size:2rem;
+font-weight:900;
+letter-spacing:2px;
+background:linear-gradient(to right,var(--c5),#fff,var(--c2));
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+text-align:center;
+}
+
+.subtitle{
+font-size:13px;
+opacity:.8;
+margin-top:-10px;
+}
+
+.selector{
+width:100%;
+position:relative;
+}
+
+.selector-btn{
+width:100%;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:16px;
+border:none;
+border-radius:20px;
+background:rgba(255,255,255,.06);
+backdrop-filter:blur(20px);
+border:1px solid var(--border);
+color:#fff;
+font-size:16px;
+cursor:pointer;
+box-shadow:var(--shadow);
+transition:.3s;
+}
+
+.selector-btn:hover{
+transform:translateY(-2px);
+}
+
+.selector-left{
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+.selector-icon{
+width:42px;
+height:42px;
+border-radius:12px;
+background:linear-gradient(135deg,var(--c2),var(--c5));
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:20px;
+}
+
+.selector-options{
+display:none;
+position:absolute;
+top:75px;
+left:0;
+right:0;
+background:rgba(10,10,10,.92);
+backdrop-filter:blur(20px);
+border-radius:20px;
+overflow:hidden;
+border:1px solid rgba(255,255,255,.08);
+box-shadow:0 20px 60px rgba(0,0,0,.6);
+z-index:50;
+animation:drop .25s ease;
+}
+
+@keyframes drop{
+from{
+opacity:0;
+transform:translateY(-10px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+.option{
+padding:15px 18px;
+cursor:pointer;
+transition:.25s;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.option:hover{
+background:rgba(255,255,255,.06);
+padding-left:25px;
+}
+
+.upload-box{
+width:100%;
+min-height:280px;
+border-radius:28px;
+border:2px dashed rgba(255,255,255,.15);
+background:rgba(255,255,255,.05);
+backdrop-filter:blur(22px);
+display:flex;
+justify-content:center;
+align-items:center;
+position:relative;
+overflow:hidden;
+cursor:pointer;
+transition:.35s;
+box-shadow:var(--shadow);
+}
+
+.upload-box:hover{
+transform:translateY(-4px);
+border-color:var(--c5);
+}
+
+.upload-box.drag{
+border-color:var(--c5);
+background:rgba(251,212,73,.08);
+}
+
+.upload-content{
+text-align:center;
+padding:25px;
+z-index:2;
+}
+
+.upload-icon{
+font-size:60px;
+margin-bottom:10px;
+animation:bounce 2s infinite;
+}
+
+@keyframes bounce{
+0%,100%{transform:translateY(0)}
+50%{transform:translateY(-10px)}
+}
+
+.upload-text{
+font-size:18px;
+font-weight:700;
+}
+
+.upload-sub{
+margin-top:6px;
+font-size:13px;
+opacity:.75;
+}
+
+#preview{
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+object-fit:cover;
+display:none;
+}
+
+.analyze{
+position:absolute;
+inset:0;
+background:rgba(0,0,0,.78);
+display:none;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+gap:20px;
+z-index:5;
+}
+
+.loader{
+width:80px;
+height:80px;
+border-radius:50%;
+border:6px solid rgba(255,255,255,.08);
+border-top:6px solid var(--c5);
+animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+100%{transform:rotate(360deg)}
+}
+
+.analyze h2{
+font-size:24px;
+}
+
+.analyze p{
+opacity:.8;
+}
+
+.result-card{
+width:100%;
+padding:22px;
+border-radius:24px;
+background:rgba(255,255,255,.06);
+backdrop-filter:blur(18px);
+border:1px solid rgba(255,255,255,.1);
+box-shadow:var(--shadow);
+display:none;
+flex-direction:column;
+gap:18px;
+animation:resultShow .5s ease;
+}
+
+@keyframes resultShow{
+from{
+opacity:0;
+transform:translateY(20px) scale(.95);
+}
+to{
+opacity:1;
+transform:translateY(0) scale(1);
+}
+}
+
+.signal{
+font-size:48px;
+font-weight:900;
+text-align:center;
+padding:20px;
+border-radius:20px;
+letter-spacing:3px;
+animation:flash 1s infinite alternate;
+}
+
+.signal.up{
+background:linear-gradient(135deg,#00c853,#007e33);
+box-shadow:0 0 30px rgba(0,255,100,.45);
+}
+
+.signal.down{
+background:linear-gradient(135deg,#ff1744,#b00020);
+box-shadow:0 0 30px rgba(255,0,70,.45);
+}
+
+@keyframes flash{
+from{transform:scale(1)}
+to{transform:scale(1.03)}
+}
+
+.stats{
+display:flex;
+justify-content:space-between;
+gap:12px;
+}
+
+.stat{
+flex:1;
+padding:14px;
+border-radius:18px;
+background:rgba(0,0,0,.35);
+text-align:center;
+}
+
+.stat h4{
+font-size:12px;
+opacity:.7;
+margin-bottom:8px;
+}
+
+.stat p{
+font-size:20px;
+font-weight:800;
+}
+
+.footer{
+font-size:12px;
+opacity:.55;
+padding-bottom:20px;
+}
+
+.lock-screen{
+position:fixed;
+inset:0;
+background:
+linear-gradient(135deg,#090909,#120800,#000);
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:999999;
+padding:20px;
+}
+
+.lock-card{
+width:100%;
+max-width:360px;
+background:rgba(255,255,255,.06);
+border:1px solid rgba(255,255,255,.1);
+backdrop-filter:blur(24px);
+border-radius:30px;
+padding:28px;
+box-shadow:0 30px 80px rgba(0,0,0,.6);
+animation:fadeIn .5s ease;
+}
+
+.lock-logo{
+width:90px;
+height:90px;
+margin:auto;
+margin-bottom:15px;
+border-radius:25px;
+background:rgba(255,255,255,.08);
+display:flex;
+justify-content:center;
+align-items:center;
+overflow:hidden;
+}
+
+.lock-logo img{
+width:85%;
+height:85%;
+object-fit:contain;
+}
+
+.lock-title{
+font-size:28px;
+font-weight:900;
+text-align:center;
+margin-bottom:15px;
+color:var(--c5);
+}
+
+.uid{
+background:#0b0b0b;
+border:1px dashed var(--c5);
+padding:12px;
+border-radius:16px;
+font-size:13px;
+word-break:break-all;
+text-align:center;
+margin-bottom:20px;
+font-family:monospace;
+}
+
+.contact{
+display:flex;
+align-items:center;
+gap:12px;
+padding:12px;
+border-radius:14px;
+background:rgba(255,255,255,.04);
+margin-bottom:12px;
+text-decoration:none;
+color:#fff;
+transition:.3s;
+}
+
+.contact:hover{
+transform:translateX(5px);
+background:rgba(255,255,255,.08);
+}
+
+.contact img{
+width:24px;
+height:24px;
+}
+
+.reload{
+width:100%;
+margin-top:15px;
+padding:15px;
+border:none;
+border-radius:18px;
+background:linear-gradient(135deg,var(--c2),var(--c5));
+color:#000;
+font-weight:900;
+font-size:15px;
+cursor:pointer;
+}
+
+.hidden{
+display:none!important;
+}
+
+</style>
+</head>
+<body>
+
+<div class="floating f1"></div>
+<div class="floating f2"></div>
+
+<div id="lockScreen" class="lock-screen hidden">
+<div class="lock-card">
+
+<div class="lock-logo">
+<img src="logo.png">
+</div>
+
+<div class="lock-title">RQA SIGNALS BOT</div>
+
+<div class="uid" id="uidBox"></div>
+
+<a class="contact" href="https://t.me/AhmadTrader3">
+<img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg">
+<span>@AhmadTrader3</span>
+</a>
+
+<a class="contact" href="https://t.me/AHMAD_DEVELPER">
+<img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg">
+<span>@AHMAD_DEVELPER</span>
+</a>
+
+
+<button class="reload" onclick="location.reload()">
+RELOAD
+</button>
+
+</div>
+</div>
+
+<div class="app hidden" id="app">
+
+<div class="logo-wrap">
+<img src="logo.png">
+</div>
+
+<div class="title">RQA SIGNALS BOT</div>
+<div class="subtitle">AI POWERED QUOTEX SIGNALS</div>
+
+<div class="selector">
+<button class="selector-btn" id="selectorBtn">
+<div class="selector-left">
+<div class="selector-icon">⏱</div>
+<div>
+<div style="font-size:13px;opacity:.7;">Select Time</div>
+<div id="selectedText">5 sec</div>
+</div>
+</div>
+<div>▼</div>
+</button>
+
+<div class="selector-options" id="selectorOptions">
+</div>
+</div>
+
+<div class="upload-box" id="uploadBox">
+
+<img id="preview">
+
+<div class="upload-content" id="uploadContent">
+<div class="upload-icon"></div>
+<div class="upload-text">UPLOAD CHART IMAGE</div>
+<div class="upload-sub">Drag & Drop Or Click Here</div>
+</div>
+
+<div class="analyze" id="analyze">
+<div class="loader"></div>
+<h2>ANALYZING...</h2>
+<p>Generating Smart Trading Signal</p>
+</div>
+
+<input type="file" id="imageInput" accept="image/*" hidden>
+
+</div>
+
+<div class="result-card" id="resultCard">
+
+<div id="signalBox" class="signal">
+UP
+</div>
+
+<div class="stats">
+
+<div class="stat">
+<h4>WIN CHANCE</h4>
+<p id="chanceText">84%</p>
+</div>
+
+<div class="stat">
+<h4>TIME LEFT</h4>
+<p id="countdownText">5s</p>
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+RQA SIGNALS BOT • Quotex Market Analyzer</div>
+
+</div>
+
+<script>
+(function(){
+
+// ========================= FIREBASE LOCK SYSTEM =========================
+
+const projectID = "reactions-maker-site";
+const dbURL = `https://${projectID}-default-rtdb.firebaseio.com/users.json`;
+
+let myUID = localStorage.getItem('rqa_uid');
+
+if(!myUID){
+myUID = Array.from({length:20},()=>Math.floor(Math.random()*10)).join('');
+localStorage.setItem('rqa_uid',myUID);
+}
+
+document.getElementById('uidBox').innerText = myUID;
+
+fetch(dbURL)
+.then(r=>r.json())
+.then(data=>{
+
+let unlocked = false;
+
+if(data){
+Object.values(data).forEach(user=>{
+if(user.id === myUID){
+unlocked = true;
+}
+});
+}
+
+if(unlocked){
+startMainSystem();
+}else{
+document.getElementById('lockScreen').classList.remove('hidden');
+}
+
+})
+.catch(()=>{
+document.getElementById('lockScreen').classList.remove('hidden');
+});
+
+// ========================= MAIN SYSTEM =========================
+
+function startMainSystem(){
+
+document.getElementById('app').classList.remove('hidden');
+
+const selectorBtn = document.getElementById('selectorBtn');
+const selectorOptions = document.getElementById('selectorOptions');
+const selectedText = document.getElementById('selectedText');
+
+const uploadBox = document.getElementById('uploadBox');
+const imageInput = document.getElementById('imageInput');
+const preview = document.getElementById('preview');
+const uploadContent = document.getElementById('uploadContent');
+
+const analyze = document.getElementById('analyze');
+
+const resultCard = document.getElementById('resultCard');
+const signalBox = document.getElementById('signalBox');
+const chanceText = document.getElementById('chanceText');
+const countdownText = document.getElementById('countdownText');
+
+const times = [
+"5 sec",
+"10 sec",
+"15 sec",
+"30 sec",
+"1 min",
+"2 min",
+"5 min",
+"10 min",
+"15 min",
+"30 min"
+];
+
+const timeMap = {
+"5 sec":5,
+"10 sec":10,
+"15 sec":15,
+"30 sec":30,
+"1 min":60,
+"2 min":120,
+"5 min":300,
+"10 min":600,
+"15 min":900,
+"30 min":1800
+};
+
+let savedTime = localStorage.getItem('rqa_selected_time') || "5 sec";
+
+selectedText.innerText = savedTime;
+
+times.forEach(t=>{
+
+const div = document.createElement('div');
+div.className = "option";
+div.innerHTML = `
+<span>${t}</span>
+<span>⚡</span>
+`;
+
+div.onclick = ()=>{
+savedTime = t;
+selectedText.innerText = t;
+localStorage.setItem('rqa_selected_time',t);
+selectorOptions.style.display = "none";
+};
+
+selectorOptions.appendChild(div);
+
+});
+
+selectorBtn.onclick = ()=>{
+selectorOptions.style.display =
+selectorOptions.style.display === "block"
+? "none"
+: "block";
+};
+
+document.addEventListener('click',(e)=>{
+if(!e.target.closest('.selector')){
+selectorOptions.style.display = "none";
+}
+});
+
+let busy = false;
+
+// ================= IMAGE SYSTEM =================
+
+uploadBox.onclick = ()=>{
+if(busy) return;
+imageInput.click();
+};
+
+imageInput.onchange = e=>{
+const file = e.target.files[0];
+if(file) processImage(file);
+};
+
+uploadBox.addEventListener('dragover',(e)=>{
+e.preventDefault();
+if(busy) return;
+uploadBox.classList.add('drag');
+});
+
+uploadBox.addEventListener('dragleave',()=>{
+uploadBox.classList.remove('drag');
+});
+
+uploadBox.addEventListener('drop',(e)=>{
+e.preventDefault();
+uploadBox.classList.remove('drag');
+
+if(busy) return;
+
+const file = e.dataTransfer.files[0];
+
+if(file && file.type.startsWith('image/')){
+processImage(file);
+}
+});
+
+function processImage(file){
+
+busy = true;
+
+const reader = new FileReader();
+
+reader.onload = e=>{
+
+preview.src = e.target.result;
+preview.style.display = "block";
+
+uploadContent.style.display = "none";
+
+analyze.style.display = "flex";
+
+setTimeout(()=>{
+
+analyze.style.display = "none";
+
+generateSignal();
+
+},2000);
+
+};
+
+reader.readAsDataURL(file);
+
+}
+
+// ================= SIGNAL SYSTEM =================
+
+function generateSignal(){
+
+resultCard.style.display = "flex";
+
+const signal = Math.random() > 0.5 ? "UP" : "DOWN";
+
+const chance = Math.floor(Math.random()*11)+80;
+
+signalBox.innerText = signal;
+
+signalBox.className =
+signal === "UP"
+? "signal up"
+: "signal down";
+
+chanceText.innerText = chance + "%";
+
+let seconds = timeMap[savedTime];
+
+updateCountdown(seconds);
+
+const interval = setInterval(()=>{
+
+seconds--;
+
+updateCountdown(seconds);
+
+if(seconds <= 0){
+
+clearInterval(interval);
+
+busy = false;
+
+countdownText.innerText = "Done";
+
+setTimeout(()=>{
+
+resultCard.style.display = "none";
+
+preview.style.display = "none";
+
+uploadContent.style.display = "block";
+
+},1500);
+
+}
+
+},1000);
+
+}
+
+function updateCountdown(sec){
+
+if(sec >= 60){
+
+const m = Math.floor(sec/60);
+const s = sec % 60;
+
+countdownText.innerText =
+`${m}m ${s}s`;
+
+}else{
+
+countdownText.innerText =
+`${sec}s`;
+
+}
+
+}
+
+}
+
+})();
+</script>
+
+</body>
+  </html>
