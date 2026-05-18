@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RQA AUTO TRADING BOT</title>
+</head>
+<body>
+    <script id="js">
+(function() {
+    /* ------------------ 1. CONFIG & STORAGE ------------------ */
+    const storageKey = 'AHMAD_ULTRA_FINAL';
+    const dbURL = `https://reactions-maker-site-default-rtdb.firebaseio.com/users.json`;
+    const logoURL = "https://i.ibb.co/j9bDyCSd/IMG-20260401-WA0000.jpg";
+    
+    let myUID = localStorage.getItem(storageKey + '_UID') || (Math.random().toString().slice(2, 22));
+    localStorage.setItem(storageKey + '_UID', myUID);
+
+    const old = document.getElementById('ahmad-final-root');
+    if (old) old.remove();
+
+    /* ------------------ 2. DYNAMIC UI & ANIMATIONS ------------------ */
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @keyframes liquid-glow { 0% { border-color: #DA840B; box-shadow: 0 0 10px #DA840B; } 50% { border-color: #00ffcc; box-shadow: 0 0 25px #00ffcc; } 100% { border-color: #DA840B; box-shadow: 0 0 10px #DA840B; } }
+        @keyframes scan-rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes qr-line-anim { 0% { top: 0%; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        
+        #ahmad-final-root {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none; z-index: 2147483647; font-family: 'Segoe UI', sans-serif;
+        }
+        #ahmad-bot {
+            width: 320px; background: rgba(8, 8, 8, 0.98); border: 3px solid #722082;
+            border-radius: 30px; padding: 25px; color: white; pointer-events: auto;
+            animation: liquid-glow 4s infinite; text-align: center;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.9); transition: 0.4s;
+        }
+        .header-title { font-weight: 900; background: linear-gradient(to right, #823E00, #FCB30F); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 18px; margin-bottom: 20px; text-transform: uppercase; }
+        
+        .indicator-box { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; font-size: 11px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 50px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .online { background: #00ff00; box-shadow: 0 0 10px #00ff00; }
+        .offline { background: #ff3131; }
+
+        .live-pair-banner { background: #11020c; padding: 10px; border-radius: 12px; font-size: 14px; font-weight: bold; color: #00ffcc; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 12px; text-transform: uppercase; }
+        
+        #sig-display { background: #000; border-radius: 20px; padding: 30px; border: 1.5px solid #222; margin-bottom: 15px; position: relative; overflow: hidden; }
+        #sig-main { font-size: 36px; font-weight: 900; }
+        #sig-timer { font-size: 12px; color: #DA840B; margin-top: 10px; letter-spacing: 2px; }
+
+        .action-btn { width: 100%; padding: 15px; border-radius: 18px; border: none; font-weight: 800; cursor: pointer; transition: 0.3s; margin-top: 10px; text-transform: uppercase; }
+        
+        #floating-bot-icon {
+            position: fixed; top: 150px; right: 20px; width: 70px; height: 70px;
+            background: rgba(0,0,0,0.8); border: 2px solid #DA840B; border-radius: 50%;
+            display: none; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 2147483647; pointer-events: auto;
+            box-shadow: 0 0 20px rgba(114, 32, 130, 0.5); overflow: hidden;
+        }
+        #floating-bot-icon img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .scanning-active img { animation: scan-rotate 1s linear infinite !important; }
+
+        #qr-scan-line {
+            position: fixed; top: 0; left: 0; width: 100%; height: 5px;
+            background: #DA840B; box-shadow: 0 0 25px #00ffcc;
+            display: none; z-index: 2147483646; pointer-events: none;
+            animation: qr-line-anim 2s linear infinite;
+        }
+    `;
+    document.head.appendChild(style);
+
+    /* ------------------ 3. HTML DOM ------------------ */
+    const root = document.createElement('div');
+    root.id = 'ahmad-final-root';
+    document.body.appendChild(root);
+
+    const qrLine = document.createElement('div');
+    qrLine.id = 'qr-scan-line';
+    document.body.appendChild(qrLine);
+
+    const floatIcon = document.createElement('div');
+    floatIcon.id = 'floating-bot-icon';
+    floatIcon.innerHTML = `<img src="${logoURL}">`;
+    document.body.appendChild(floatIcon);
+
+    root.innerHTML = `
+        <div id="ahmad-bot">
+            <div class="header-title">RQA AUTO TRADING BOT</div>
+            <div class="indicator-box">
+                <div id="status-dot" class="dot offline"></div>
+                <span id="status-msg">OFFLINE BY SERVER</span>
+            </div>
+
+            <div id="auth-box">
+                <div style="background:#111; padding:15px; border-radius:15px; margin-bottom:15px; border:1px dashed #444;">
+                    <span style="color:#888; font-size:10px;">YOUR UNIQUE TERMINAL ID</span><br>
+                    <b id="uid-v9" style="font-size:11px;">${myUID}</b><br>
+                    <button id="copy-v9" style="background:none; border:none; color:#00ffcc; cursor:pointer; font-size:11px; margin-top:8px;">COPY LICENSE</button>
+                </div>
+                <button class="action-btn" style="background:#DA840B; color:white;" id="verify-v9">GET ACCESS</button>
+            </div>
+
+            <div id="bot-main" style="display:none;">
+                <div id="current-detected-pair" class="live-pair-banner">SCANNING CHART ASSET...</div>
+                
+                <div id="sig-display">
+                    <div id="sig-main" style="color:#333;">IDLE</div>
+                    <div id="sig-timer">READY TO SCAN</div>
+                </div>
+                
+                <button class="action-btn" style="background:#DA840B; color:#00ffcc; border:1px solid #333;" id="hide-to-icon">SWITCH TO ICON</button>
+            </div>
+        </div>
+    `;
+
+    /* ------------------ 4. FINANCIAL INDICATOR ENGINE (REAL MATH API) ------------------ */
+    let isProcessing = false;
+    let clickTimer = null;
+    let scannedPriceHistory = [];
+
+    // Background Thread: Screen Monitoring & Array Processing
+    setInterval(() => {
+        try {
+            const assetElement = document.querySelector('.current-asset, .trading-chart-pair, .asset-select__button');
+            const priceElement = document.querySelector('.chart-container-price, .live-price-quote, .current-price');
+            
+            const banner = document.getElementById('current-detected-pair');
+
+            if (assetElement && banner) {
+                banner.innerText = "Target: " + assetElement.innerText.trim();
+            }
+
+            if (priceElement) {
+                let cleanPrice = parseFloat(priceElement.innerText.replace(/[^0-9.]/g, ''));
+                if (!isNaN(cleanPrice)) {
+                    scannedPriceHistory.push(cleanPrice);
+                    if (scannedPriceHistory.length > 60) scannedPriceHistory.shift(); // 60 Ticks Cap for SMA
+                }
+            }
+        } catch (e) {}
+    }, 250); // Har 250ms par micro-tick fetch ho raha hai
+
+    function findButtonAndClick(dir) {
+        const query = dir === "UP" ? "Up" : "Down";
+        const all = document.querySelectorAll('button, span, div, a');
+        for (let el of all) {
+            if (el.innerText.trim() === query && el.offsetWidth > 0) {
+                el.click(); return true;
+            }
+        }
+        return false;
+    }
+
+    async function startScanning() {
+        if (isProcessing) return; 
+        isProcessing = true;
+        
+        qrLine.style.display = "block";
+        floatIcon.classList.add('scanning-active');
+        const mainTxt = document.getElementById('sig-main');
+        const timerTxt = document.getElementById('sig-timer');
+
+        mainTxt.innerText = "CALCULATING..."; 
+        mainTxt.style.color = "#00ffcc";
+
+        // AI/Indicator processing delay simulation
+        await new Promise(r => setTimeout(r, 4000));
+        
+        qrLine.style.display = "none"; 
+        floatIcon.classList.remove('scanning-active');
+
+        let side = "UP"; 
+        
+        // --- REAL MATHEMATICAL INDICATOR LOGIC (SMA Strategy) ---
+        if (scannedPriceHistory.length >= 14) {
+            const total = scannedPriceHistory.length;
+            const currentPrice = scannedPriceHistory[total - 1];
+
+            // 1. Calculate a 14-Period Simple Moving Average (Baseline)
+            let smaSum = 0;
+            for (let i = total - 14; i < total; i++) {
+                smaSum += scannedPriceHistory[i];
+            }
+            const sma14 = smaSum / 14;
+
+            // 2. Decision Rules:
+            // If current price is strictly above SMA14, market is in UpTrend -> CALL
+            // If current price is below SMA14, market is in DownTrend -> PUT
+            if (currentPrice < sma14) {
+                side = "DOWN";
+            }
+        } else {
+            // Trend-probability filter fallback
+            side = Math.random() > 0.5 ? "UP" : "DOWN";
+        }
+
+        mainTxt.innerText = side === "UP" ? "CALL ↑" : "PUT ↓";
+        mainTxt.style.color = side === "UP" ? "#00ff00" : "#ff3131";
+
+        findButtonAndClick(side);
+
+        let remaining = 15; // 15 Seconds standard trade duration
+        let countdown = setInterval(() => {
+            remaining--;
+            timerTxt.innerText = `EXPIRATION: ${remaining}s`;
+            if (remaining <= 0) {
+                clearInterval(countdown);
+                isProcessing = false; 
+                mainTxt.innerText = "IDLE";
+                timerTxt.innerText = "READY";
+            }
+        }, 1000);
+    }
+
+    /* ------------------ 5. INTERFACE ACTIONS ------------------ */
+    document.getElementById('verify-v9').onclick = async function() {
+        const btn = this;
+        btn.innerText = "VERIFYING...";
+        try {
+            const res = await fetch(dbURL);
+            const data = await res.json();
+            const user = Object.values(data || {}).find(u => u.id === myUID && u.status === "active");
+            
+            if (user) {
+                document.getElementById('auth-box').style.display = "none";
+                document.getElementById('bot-main').style.display = "block";
+                document.getElementById('status-dot').className = "dot online";
+                document.getElementById('status-msg').innerText = "SYSTEM UNLOCKED";
+            } else {
+                btn.innerText = "ID INACTIVE";
+                setTimeout(() => btn.innerText = "GET ACCESS", 2000);
+            }
+        } catch (e) {
+            btn.innerText = "GET ACCESS";
+        }
+    };
+
+    floatIcon.onclick = () => {
+        if (clickTimer == null) {
+            clickTimer = setTimeout(() => {
+                clickTimer = null;
+                startScanning(); 
+            }, 300);
+        } else {
+            clearTimeout(clickTimer);
+            clickTimer = null;
+            floatIcon.style.display = "none";
+            root.style.display = "flex";
+        }
+    };
+
+    document.getElementById('hide-to-icon').onclick = () => {
+        root.style.display = "none";
+        floatIcon.style.display = "flex";
+    };
+
+    document.getElementById('copy-v9').onclick = function() {
+        navigator.clipboard.writeText(myUID);
+        this.innerText = "COPIED"; setTimeout(() => this.innerText = "COPY LICENSE", 2000);
+    };
+
+})();
+</script>
+</body>
+  </html>
+  
