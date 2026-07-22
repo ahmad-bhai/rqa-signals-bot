@@ -1,0 +1,20 @@
+{
+  "short_name": "RQA BOT",
+  "name": "RQA BOT",
+  "icons": [
+    {
+      "src": "logo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "background_color": "#EC640C",
+  "theme_color": "#EC640C",
+  "display": "standalone",
+  "orientation": "portrait"
+}
