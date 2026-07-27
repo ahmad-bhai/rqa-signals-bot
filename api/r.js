@@ -1,118 +1,120 @@
 export default async function handler(req, res) {
-    // CORS headers
+    // 1. Full CORS Headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    // Handle Preflight OPTIONS request
+    // Preflight OPTIONS Request Handle karna
     if (req.method === 'OPTIONS') {  
         return res.status(200).end();  
     }  
 
+    // Output strictly Text format rakhne ke liye default header
+    res.setHeader('Content-Type', 'text/plain');
+
     try {  
-        // 1. URL se ID read karna
+        // 2. Query Parameter Se ID Read Karna (?id=...)
         const { searchParams } = new URL(req.url, `http://${req.headers.host}`);  
         let incomingId = searchParams.get('id');  
 
         if (!incomingId) {  
-            res.setHeader('Content-Type', 'text/plain');
             return res.status(200).send("No ID Provided");  
         }  
 
         incomingId = String(incomingId).trim();
 
-        // 2. Real-Time Device & Client Metadata Tracking
+        // 3. Complete Device, IP & Browser Tracking
         const userAgent = req.headers['user-agent'] || 'Unknown Device';
-        const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'Unknown IP';
+        const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket?.remoteAddress || 'Unknown IP';
         const language = req.headers['accept-language']?.split(',')[0] || 'Unknown';
 
-        // Simple User-Agent Parsing (Quotex / Platform Style Browser & OS Detection)
+        // Platform & Browser Identification
         let os = "Unknown OS";
         if (userAgent.includes("Windows")) os = "Windows PC";
         else if (userAgent.includes("Macintosh")) os = "macOS";
         else if (userAgent.includes("Android")) os = "Android Mobile";
-        else if (userAgent.includes("iPhone") || userAgent.includes("iPad")) os = "iOS Device";
+        else if (userAgent.includes("iPhone") || userAgent.includes("iPad")) os = "iOS";
         else if (userAgent.includes("Linux")) os = "Linux";
 
         let browser = "Unknown Browser";
-        if (userAgent.includes("Chrome") && !userAgent.includes("Edg")) browser = "Google Chrome";
-        else if (userAgent.includes("Safari") && !userAgent.includes("Chrome")) browser = "Apple Safari";
-        else if (userAgent.includes("Firefox")) browser = "Mozilla Firefox";
-        else if (userAgent.includes("Edg")) browser = "Microsoft Edge";
+        if (userAgent.includes("Chrome") && !userAgent.includes("Edg")) browser = "Chrome";
+        else if (userAgent.includes("Safari") && !userAgent.includes("Chrome")) browser = "Safari";
+        else if (userAgent.includes("Firefox")) browser = "Firefox";
+        else if (userAgent.includes("Edg")) browser = "Edge";
 
         const now = new Date();
-        const currentLog = {
+        const newLogEntry = {
             timestamp: now.toISOString(),
             date: now.toLocaleDateString('en-US', { timeZone: 'Asia/Karachi' }),
             time: now.toLocaleTimeString('en-US', { timeZone: 'Asia/Karachi' }),
             ip: clientIp,
             device: `${os} | ${browser}`,
             userAgent: userAgent,
-            language: language,
-            requestUrl: req.url
+            language: language
         };
 
-        // 3. New Firebase Realtime Database Endpoint
-        const dbURL = `https://rqa-bot-admin-default-rtdb.firebaseio.com/users.json`;  
-        const response = await fetch(dbURL);  
+        // 4. Firebase Realtime DB URL
+        const firebaseBaseURL = "https://rqa-bot-admin-default-rtdb.firebaseio.com";
+        const getUsersUrl = `${firebaseBaseURL}/users.json`;
+
+        // Firebase se poora users collection fetch karein
+        const fetchResponse = await fetch(getUsersUrl);  
           
-        if (!response.ok) {  
-            res.setHeader('Content-Type', 'text/plain');
+        if (!fetchResponse.ok) {  
+            // Connection error ki wajah se wahi ID waapas show karega
             return res.status(200).send(incomingId);  
         }  
 
-        const allUsers = await response.json();  
-        let userKey = null;
-        let userData = null;
+        const allUsers = await fetchResponse.json();  
+        let foundUserKey = null;
+        let foundUserData = null;
 
         if (allUsers) {  
             for (let key in allUsers) {  
-                if (allUsers[key] && String(allUsers[key].id) === incomingId) {  
-                    userKey = key;
-                    userData = allUsers[key];
+                if (allUsers[key] && String(allUsers[key].id).trim() === incomingId) {  
+                    foundUserKey = key;
+                    foundUserData = allUsers[key];
                     break;  
                 }  
             }  
         }  
 
-        // Check user active/unlocked status
-        const isUnlocked = userData && userData.status === "active";
+        // Active status verification
+        const isUnlocked = foundUserData && foundUserData.status === "active";
 
-        // 4. Log Update Mechanism (Keep Last 5 Logs)
-        if (userKey) {
-            currentLog.status = isUnlocked ? "Unlocked (Active)" : "Locked (Inactive)";
+        // 5. DATA SAVE IN FIREBASE (5-Log Array Maintenance)
+        if (foundUserKey) {
+            newLogEntry.status = isUnlocked ? "Unlocked (Active)" : "Locked (Inactive)";
 
-            let existingLogs = userData.logs || [];
-            // Safe array handling
+            let existingLogs = foundUserData.logs;
             if (!Array.isArray(existingLogs)) {
                 existingLogs = [];
             }
 
-            // Latest log ko top par rakhein aur max 5 slots maintain karein
-            existingLogs.unshift(currentLog);
-            const updatedLogs = existingLogs.slice(0, 5);
+            // Latest log top par rakhein aur total 5 maintain karein
+            existingLogs.unshift(newLogEntry);
+            const last5Logs = existingLogs.slice(0, 5);
 
-            // Firebase mein latest log write back karna
-            await fetch(`https://rqa-bot-admin-default-rtdb.firebaseio.com/users/${userKey}/logs.json`, {
+            // Firebase RTDB mein logs directly Save / Update karna
+            const updateLogsUrl = `${firebaseBaseURL}/users/${foundUserKey}/logs.json`;
+            
+            await fetch(updateLogsUrl, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedLogs)
+                body: JSON.stringify(last5Logs)
             });
         }
 
-        // 5. Response Routing
-        res.setHeader('Content-Type', 'text/plain');
-
+        // 6. Response Handling
         if (isUnlocked) {  
-            // Agar Unlocked/Active hai toh R return karega
+            // Unlock ho toh R
             return res.status(200).send("R");  
         } else {  
-            // Agar Lock / Inactive / Non-existent hai toh wahi ID output hogi
+            // Unlock Na ho toh Wahi ID
             return res.status(200).send(incomingId);  
         }  
 
     } catch (error) {  
-        res.setHeader('Content-Type', 'text/plain');
         return res.status(200).send(req.query?.id || "Error");  
     }
 }
