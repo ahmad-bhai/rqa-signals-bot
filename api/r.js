@@ -1,21 +1,24 @@
 export default async function handler(req, res) {
-    // 1. Full CORS Headers
+    // 1. Full CORS Headers Setup
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 
     // Preflight OPTIONS Request Handle karna
     if (req.method === 'OPTIONS') {  
         return res.status(200).end();  
     }  
 
-    // Output strictly Text format rakhne ke liye default header
-    res.setHeader('Content-Type', 'text/plain');
-
     try {  
-        // 2. Query Parameter Se ID Read Karna (?id=...)
-        const { searchParams } = new URL(req.url, `http://${req.headers.host}`);  
-        let incomingId = searchParams.get('id');  
+        // 2. Safely Extract ID from Query Parameters
+        let incomingId = null;
+        if (req.query && req.query.id) {
+            incomingId = req.query.id;
+        } else {
+            const parsedUrl = new URL(req.url, `http://${req.headers['host'] || 'localhost'}`);
+            incomingId = parsedUrl.searchParams.get('id');
+        }
 
         if (!incomingId) {  
             return res.status(200).send("No ID Provided");  
@@ -23,94 +26,102 @@ export default async function handler(req, res) {
 
         incomingId = String(incomingId).trim();
 
-        // 3. Complete Device, IP & Browser Tracking
-        const userAgent = req.headers['user-agent'] || 'Unknown Device';
-        const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket?.remoteAddress || 'Unknown IP';
-        const language = req.headers['accept-language']?.split(',')[0] || 'Unknown';
+        // 3. Advanced Device, OS, Browser & IP Extraction
+        const rawUserAgent = req.headers['user-agent'] || '';
+        const clientIp = (req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '').split(',')[0].trim();
 
-        // Platform & Browser Identification
+        // OS Detection
         let os = "Unknown OS";
-        if (userAgent.includes("Windows")) os = "Windows PC";
-        else if (userAgent.includes("Macintosh")) os = "macOS";
-        else if (userAgent.includes("Android")) os = "Android Mobile";
-        else if (userAgent.includes("iPhone") || userAgent.includes("iPad")) os = "iOS";
-        else if (userAgent.includes("Linux")) os = "Linux";
+        if (/windows nt/i.test(rawUserAgent)) os = "Windows PC";
+        else if (/macintosh|mac os x/i.test(rawUserAgent)) os = "macOS";
+        else if (/android/i.test(rawUserAgent)) os = "Android Mobile";
+        else if (/iphone|ipad|ipod/i.test(rawUserAgent)) os = "iOS Device";
+        else if (/linux/i.test(rawUserAgent)) os = "Linux";
 
+        // Browser Detection
         let browser = "Unknown Browser";
-        if (userAgent.includes("Chrome") && !userAgent.includes("Edg")) browser = "Chrome";
-        else if (userAgent.includes("Safari") && !userAgent.includes("Chrome")) browser = "Safari";
-        else if (userAgent.includes("Firefox")) browser = "Firefox";
-        else if (userAgent.includes("Edg")) browser = "Edge";
+        if (/edg/i.test(rawUserAgent)) browser = "Microsoft Edge";
+        else if (/chrome|crios/i.test(rawUserAgent) && !/edg/i.test(rawUserAgent)) browser = "Google Chrome";
+        else if (/safari/i.test(rawUserAgent) && !/chrome|crios/i.test(rawUserAgent)) browser = "Apple Safari";
+        else if (/firefox|fxios/i.test(rawUserAgent)) browser = "Mozilla Firefox";
 
+        const isUnknownIP = !clientIp || clientIp === 'Unknown IP' || clientIp === '127.0.0.1' || clientIp === '::1';
+        const isUnknownDevice = os === "Unknown OS" || browser === "Unknown Browser" || !rawUserAgent;
+        const isBotOrCurl = /curl|python|postman|insomnia|wget|bot|crawler|spider/i.test(rawUserAgent);
+
+        const firebaseBaseURL = "https://rqa-bot-admin-default-rtdb.firebaseio.com";
+
+        // 4. Fetch All Users from Firebase
+        const fetchResponse = await fetch(`${firebaseBaseURL}/users.json`);  
+        if (!fetchResponse.ok) {  
+            return res.status(200).send(incomingId);  
+        }  
+
+        const allUsers = await fetchResponse.json();  
+        let userKey = null;
+        let userData = null;
+
+        if (allUsers) {  
+            for (let key in allUsers) {  
+                if (allUsers[key] && String(allUsers[key].id).trim() === incomingId) {  
+                    userKey = key;
+                    userData = allUsers[key];
+                    break;  
+                }  
+            }  
+        }
+
+        // 🚨 5. SECURITY CHECK: AGAR IP/DEVICE UNKNOWN HO YA BOT HO TO USER DELETE KARO
+        if (isUnknownIP || isUnknownDevice || isBotOrCurl) {
+            if (userKey) {
+                // Firebase se User PERMANENT DELETE kar do
+                await fetch(`${firebaseBaseURL}/users/${userKey}.json`, {
+                    method: 'DELETE'
+                });
+            }
+            // Block response
+            return res.status(200).send("LOCKED_SECURITY_VIOLATION");
+        }
+
+        // Agar user database mein exist hi nahi karta
+        if (!userData || !userKey) {
+            return res.status(200).send(incomingId);
+        }
+
+        // Active / Unlocked Status Check
+        const isUnlocked = userData.status === "active";
+
+        // 6. LOGS CREATION & ROTATION (5 Logs Object Format)
         const now = new Date();
-        const newLogEntry = {
+        const currentLog = {
             timestamp: now.toISOString(),
             date: now.toLocaleDateString('en-US', { timeZone: 'Asia/Karachi' }),
             time: now.toLocaleTimeString('en-US', { timeZone: 'Asia/Karachi' }),
             ip: clientIp,
             device: `${os} | ${browser}`,
-            userAgent: userAgent,
-            language: language
+            status: isUnlocked ? "Unlocked (Active)" : "Locked (Inactive)"
         };
 
-        // 4. Firebase Realtime DB URL
-        const firebaseBaseURL = "https://rqa-bot-admin-default-rtdb.firebaseio.com";
-        const getUsersUrl = `${firebaseBaseURL}/users.json`;
-
-        // Firebase se poora users collection fetch karein
-        const fetchResponse = await fetch(getUsersUrl);  
-          
-        if (!fetchResponse.ok) {  
-            // Connection error ki wajah se wahi ID waapas show karega
-            return res.status(200).send(incomingId);  
-        }  
-
-        const allUsers = await fetchResponse.json();  
-        let foundUserKey = null;
-        let foundUserData = null;
-
-        if (allUsers) {  
-            for (let key in allUsers) {  
-                if (allUsers[key] && String(allUsers[key].id).trim() === incomingId) {  
-                    foundUserKey = key;
-                    foundUserData = allUsers[key];
-                    break;  
-                }  
-            }  
-        }  
-
-        // Active status verification
-        const isUnlocked = foundUserData && foundUserData.status === "active";
-
-        // 5. DATA SAVE IN FIREBASE (5-Log Array Maintenance)
-        if (foundUserKey) {
-            newLogEntry.status = isUnlocked ? "Unlocked (Active)" : "Locked (Inactive)";
-
-            let existingLogs = foundUserData.logs;
-            if (!Array.isArray(existingLogs)) {
-                existingLogs = [];
-            }
-
-            // Latest log top par rakhein aur total 5 maintain karein
-            existingLogs.unshift(newLogEntry);
-            const last5Logs = existingLogs.slice(0, 5);
-
-            // Firebase RTDB mein logs directly Save / Update karna
-            const updateLogsUrl = `${firebaseBaseURL}/users/${foundUserKey}/logs.json`;
-            
-            await fetch(updateLogsUrl, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(last5Logs)
-            });
+        let existingLogs = [];
+        if (userData.logs && typeof userData.logs === 'object') {
+            existingLogs = Array.isArray(userData.logs) ? userData.logs : Object.values(userData.logs);
         }
 
-        // 6. Response Handling
+        // Latest log sabse aage add karo aur last 5 maintain karo
+        existingLogs.unshift(currentLog);
+        const updatedLogs = existingLogs.slice(0, 5);
+
+        // Firebase RTDB me Logs UPDATE/SAVE karo
+        await fetch(`${firebaseBaseURL}/users/${userKey}/logs.json`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedLogs)
+        });
+
+        // 7. FINAL RESPONSE
         if (isUnlocked) {  
-            // Unlock ho toh R
             return res.status(200).send("R");  
         } else {  
-            // Unlock Na ho toh Wahi ID
             return res.status(200).send(incomingId);  
         }  
 
