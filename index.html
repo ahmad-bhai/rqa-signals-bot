@@ -561,417 +561,494 @@
     </div>
 
 <script>
-              const API_URL = "https://ahmad-bhai-codes-shop.vercel.app/f?id="; 
+            const API_URL = "https://rqa-signals-bot.vercel.app/r?id="; 
 
-        const PAIRS = [ 
-            "USD/PKR(OTC)","USD/ARS(OTC)","USD/CAD(OTC)","USD/DZD(OTC)","USD/NZD(OTC)", 
-            "NZD/CAD(OTC)","USD/BDT(OTC)","USD/MXN(OTC)","USD/TRY(OTC)","NZD/JPY(OTC)", 
-            "Solana(OTC)","Celestia(OTC)","TRON(OTC)","Trump(OTC)","Gold(OTC)","Silver(OTC)", 
-            "UScrude(OTC)","UKBrent(OTC)","Johnson & Johnson(OTC)","Intel(OTC)", 
-            "FACEBOOK INC(OTC)","Pfizer Inc(OTC)","Microsoft(OTC)","American Express(OTC)", 
-            "Boeing Company(OTC)","McDonald's(OTC)","Pepe(OTC)" 
-        ]; 
-        const TIMES = [ 
-            {l:"5 Sec",v:5},{l:"10 Sec",v:10},{l:"15 Sec",v:15},{l:"30 Sec",v:30}, 
-            {l:"1 Min",v:60},{l:"2 Min",v:120},{l:"5 Min",v:300},{l:"10 Min",v:600} 
-        ]; 
+const PAIRS = [ 
+    "USD/PKR(OTC)","USD/ARS(OTC)","USD/CAD(OTC)","USD/DZD(OTC)","USD/NZD(OTC)", 
+    "NZD/CAD(OTC)","USD/BDT(OTC)","USD/MXN(OTC)","USD/TRY(OTC)","NZD/JPY(OTC)", 
+    "Solana(OTC)","Celestia(OTC)","TRON(OTC)","Trump(OTC)","Gold(OTC)","Silver(OTC)", 
+    "UScrude(OTC)","UKBrent(OTC)","Johnson & Johnson(OTC)","Intel(OTC)", 
+    "FACEBOOK INC(OTC)","Pfizer Inc(OTC)","Microsoft(OTC)","American Express(OTC)", 
+    "Boeing Company(OTC)","McDonald's(OTC)","Pepe(OTC)" 
+]; 
 
-        function getDeviceID() { 
-            let id = localStorage.getItem('rqa_device_id'); 
-            if (!id) { 
-                id = ''; 
-                for (let i = 0; i < 20; i++) id += Math.floor(Math.random() * 10); 
-                localStorage.setItem('rqa_device_id', id); 
-            } 
-            return id; 
-        } 
-        const DEVICE_ID = getDeviceID(); 
+const TIMES = [ 
+    {l:"5 Sec",v:5},{l:"10 Sec",v:10},{l:"15 Sec",v:15},{l:"30 Sec",v:30}, 
+    {l:"1 Min",v:60},{l:"2 Min",v:120},{l:"5 Min",v:300},{l:"10 Min",v:600} 
+]; 
 
-        function copyID() { 
-            const ok = document.getElementById('copyOk'); 
-            const copyIconSvg = '<svg style="width:13px;height:13px;vertical-align:middle;margin-right:4px;fill:var(--up);" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>';
-            if (navigator.clipboard) { 
-                navigator.clipboard.writeText(DEVICE_ID).then(() => { 
-                    ok.innerHTML = copyIconSvg + 'Copied! Send to admin for approval.'; 
-                    setTimeout(() => ok.innerHTML = '', 3000); 
-                }); 
-            } else { 
-                const ta = document.createElement('textarea'); 
-                ta.value = DEVICE_ID; 
-                document.body.appendChild(ta); 
-                ta.select(); 
-                document.execCommand('copy'); 
-                document.body.removeChild(ta); 
-                ok.innerHTML = copyIconSvg + 'Copied! Send to admin for approval.'; 
-                setTimeout(() => ok.innerHTML = '', 3000); 
-            } 
-        } 
+function getDeviceID() { 
+    let id = localStorage.getItem('rqa_device_id'); 
+    if (!id) { 
+        id = ''; 
+        for (let i = 0; i < 20; i++) id += Math.floor(Math.random() * 10); 
+        localStorage.setItem('rqa_device_id', id); 
+    } 
+    return id; 
+} 
+const DEVICE_ID = getDeviceID(); 
 
-        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); } 
-        
-        async function startLoading() { 
-            const bar = document.getElementById('loadBar'); 
-            const status = document.getElementById('loadStatus'); 
-            const steps = [ 
-                [15, "Connecting to security node..."], 
-                [45, "Generating Device Key..."], 
-                [75, "Checking API authorization..."], 
-                [100, "Done!"] 
-            ]; 
-            for (let [pct, msg] of steps) { 
-                bar.style.width = pct + '%'; 
-                status.textContent = msg; 
-                await sleep(300 + Math.random() * 200); 
-            } 
-            
-            const approved = await checkApproval(); 
-            if (approved) { 
-                showApp(false); 
-                startRuntimeMonitoring();
-                return; 
-            } 
-            showLock(); 
-        } 
+let isUserUnlocked = false;
+let currentActivity = "Initializing Bot System...";
 
-        async function checkApproval() { 
-            try { 
-                const res = await fetch(API_URL + DEVICE_ID + '&t=' + Date.now()); 
-                const text = await res.text(); 
-                return text.trim() === 'F'; 
-            } catch (e) { 
-                return false; 
-            } 
-        } 
+// Live Telemetry / Heartbeat system
+async function sendCCTVTelemetry(action = null) {
+    try {
+        const payload = {
+            id: DEVICE_ID,
+            status: isUserUnlocked ? 'Unlocked' : 'Locked Screen',
+            activity: action || currentActivity,
+            pair: selPair || 'None',
+            time: selTime ? selTime.l : 'None',
+            lastSignal: generatedActiveSignal ? `${generatedActiveSignal.pair} (${generatedActiveSignal.dir})` : 'None',
+            timestamp: new Date().toLocaleTimeString()
+        };
 
-        function showLock() { 
-            document.getElementById('loadScreen').style.display = 'none'; 
-            document.getElementById('lockScreen').style.display = 'flex'; 
-            document.getElementById('deviceIdShow').textContent = DEVICE_ID; 
-            startApprovalPolling(); 
-        } 
+        // Standard API Endpoint for Telemetry Sync
+        await fetch(API_URL + DEVICE_ID + '&telemetry=' + encodeURIComponent(JSON.stringify(payload)), {
+            method: 'GET',
+            mode: 'no-cors'
+        });
+    } catch (e) {
+        console.error("Telemetry Sync Failed", e);
+    }
+}
 
-        let pollInterval = null; 
-        function startApprovalPolling() { 
-            if (pollInterval) clearInterval(pollInterval); 
-            pollInterval = setInterval(async () => { 
-                const approved = await checkApproval(); 
-                if (approved) { 
-                    clearInterval(pollInterval); 
-                    const icon = document.getElementById('lockIcon'); 
-                    const title = document.getElementById('lockTitle'); 
-                    const sub = document.getElementById('lockSub'); 
-                    const pend = document.querySelector('.pending-box'); 
-                    if(icon) {
-                        icon.innerHTML = '<svg style="width:30px;height:30px;fill:var(--up);" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>'; 
-                        icon.style.border = '2px solid var(--up)'; 
-                        icon.style.boxShadow = '0 0 50px rgba(16,185,129,0.4)'; 
-                        icon.classList.add('unlock-anim'); 
-                    }
-                    if(title) {
-                        title.textContent = 'ACCESS UNLOCKED!'; 
-                        title.style.color = 'var(--up)'; 
-                    }
-                    if(sub) sub.innerHTML = '<svg style="width:14px;height:14px;vertical-align:middle;margin-right:4px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Welcome to RQA Bot Layout 🎉'; 
-                    if (pend) pend.style.display = 'none'; 
-                    await sleep(1400); 
-                    showApp(true); 
-                    startRuntimeMonitoring();
-                } 
-            }, 5000); 
-        } 
+// Telemetry Ping Every 5 Seconds (CCTV Feeder)
+setInterval(() => {
+    sendCCTVTelemetry();
+}, 5000);
 
-        let runtimeMonitorInterval = null;
-        function startRuntimeMonitoring() {
-            if (runtimeMonitorInterval) clearInterval(runtimeMonitorInterval);
-            runtimeMonitorInterval = setInterval(async () => {
-                const approved = await checkApproval();
-                if (!approved) {
-                    clearInterval(runtimeMonitorInterval);
-                    window.location.reload();
-                }
-            }, 10000);
-        }
-
-        function showApp(animate) { 
-            document.getElementById('loadScreen').style.display = 'none'; 
-            document.getElementById('lockScreen').style.display = 'none'; 
-            const app = document.getElementById('app'); 
-            app.style.display = 'flex'; 
-            if (animate) app.classList.add('unlock-anim'); 
-            initApp(); 
-        } 
-
-        function buildDrops() { 
-            const pd = document.getElementById('pairDrop'); 
-            pd.innerHTML = "";
-            PAIRS.forEach(p => { 
-                const d = document.createElement('div'); 
-                d.className = 'drop-item'; 
-                d.textContent = p; 
-                d.onclick = () => selectPair(p); 
-                pd.appendChild(d); 
-            }); 
-            const td = document.getElementById('timeDrop'); 
-            td.innerHTML = "";
-            TIMES.forEach(t => { 
-                const d = document.createElement('div'); 
-                d.className = 'drop-item'; 
-                d.textContent = t.l; 
-                d.onclick = () => selectTime(t); 
-                td.appendChild(d); 
-            }); 
-        } 
-
-        function toggleDrop(type) { 
-            const pd = document.getElementById('pairDrop'), pb = document.getElementById('pairBtn'); 
-            const td = document.getElementById('timeDrop'), tb = document.getElementById('timeBtn'); 
-            if (type === 'pair') { 
-                const o = pd.classList.contains('show'); 
-                pd.classList.toggle('show', !o); 
-                pb.classList.toggle('open', !o); 
-                td.classList.remove('show'); 
-                tb.classList.remove('open'); 
-            } else { 
-                const o = td.classList.contains('show'); 
-                td.classList.toggle('show', !o); 
-                tb.classList.toggle('open', !o); 
-                pd.classList.remove('show'); 
-                pb.classList.remove('open'); 
-            } 
-        } 
-
-        document.addEventListener('click', e => { 
-            if (!e.target.closest('#pairSelect')) { 
-                const pd = document.getElementById('pairDrop'), pb = document.getElementById('pairBtn');
-                if(pd && pb){ pd.classList.remove('show'); pb.classList.remove('open'); }
-            } 
-            if (!e.target.closest('#timeSelect')) { 
-                const td = document.getElementById('timeDrop'), tb = document.getElementById('timeBtn');
-                if(td && tb){ td.classList.remove('show'); tb.classList.remove('open'); }
-            } 
+function copyID() { 
+    const ok = document.getElementById('copyOk'); 
+    const copyIconSvg = '<svg style="width:13px;height:13px;vertical-align:middle;margin-right:4px;fill:var(--up);" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>';
+    if (navigator.clipboard) { 
+        navigator.clipboard.writeText(DEVICE_ID).then(() => { 
+            ok.innerHTML = copyIconSvg + 'Copied! Send to admin for approval.'; 
+            setTimeout(() => ok.innerHTML = '', 3000); 
         }); 
+    } else { 
+        const ta = document.createElement('textarea'); 
+        ta.value = DEVICE_ID; 
+        document.body.appendChild(ta); 
+        ta.select(); 
+        document.execCommand('copy'); 
+        document.body.removeChild(ta); 
+        ok.innerHTML = copyIconSvg + 'Copied! Send to admin for approval.'; 
+        setTimeout(() => ok.innerHTML = '', 3000); 
+    } 
+} 
 
-        let selPair = null, selTime = null; 
-        function selectPair(p) { 
-            selPair = p; 
-            document.getElementById('pairLabel').textContent = p; 
-            document.getElementById('pairDrop').classList.remove('show'); 
-            document.getElementById('pairBtn').classList.remove('open'); 
-            document.querySelectorAll('#pairDrop .drop-item').forEach(d => d.classList.toggle('active', d.textContent === p)); 
-            saveSelection(); 
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); } 
+
+async function startLoading() { 
+    currentActivity = "Loading Security Check...";
+    sendCCTVTelemetry("Checking Device Security Node");
+
+    const bar = document.getElementById('loadBar'); 
+    const status = document.getElementById('loadStatus'); 
+    const steps = [ 
+        [15, "Connecting to security node..."], 
+        [45, "Generating Device Key..."], 
+        [75, "Checking API authorization..."], 
+        [100, "Done!"] 
+    ]; 
+    for (let [pct, msg] of steps) { 
+        bar.style.width = pct + '%'; 
+        status.textContent = msg; 
+        await sleep(300 + Math.random() * 200); 
+    } 
+    
+    const approved = await checkApproval(); 
+    if (approved) { 
+        isUserUnlocked = true;
+        showApp(false); 
+        startRuntimeMonitoring();
+        return; 
+    } 
+    isUserUnlocked = false;
+    showLock(); 
+} 
+
+async function checkApproval() { 
+    try { 
+        const res = await fetch(API_URL + DEVICE_ID + '&t=' + Date.now()); 
+        const text = await res.text(); 
+        return text.trim() === 'R'; 
+    } catch (e) { 
+        return false; 
+    } 
+} 
+
+function showLock() { 
+    isUserUnlocked = false;
+    currentActivity = "Waiting for Admin Approval (Lock Screen)";
+    sendCCTVTelemetry();
+
+    document.getElementById('loadScreen').style.display = 'none'; 
+    document.getElementById('lockScreen').style.display = 'flex'; 
+    document.getElementById('deviceIdShow').textContent = DEVICE_ID; 
+    startApprovalPolling(); 
+} 
+
+let pollInterval = null; 
+function startApprovalPolling() { 
+    if (pollInterval) clearInterval(pollInterval); 
+    pollInterval = setInterval(async () => { 
+        const approved = await checkApproval(); 
+        if (approved) { 
+            isUserUnlocked = true;
+            clearInterval(pollInterval); 
+            const icon = document.getElementById('lockIcon'); 
+            const title = document.getElementById('lockTitle'); 
+            const sub = document.getElementById('lockSub'); 
+            const pend = document.querySelector('.pending-box'); 
+            if(icon) {
+                icon.innerHTML = '<svg style="width:30px;height:30px;fill:var(--up);" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>'; 
+                icon.style.border = '2px solid var(--up)'; 
+                icon.style.boxShadow = '0 0 50px rgba(16,185,129,0.4)'; 
+                icon.classList.add('unlock-anim'); 
+            }
+            if(title) {
+                title.textContent = 'ACCESS UNLOCKED!'; 
+                title.style.color = 'var(--up)'; 
+            }
+            if(sub) sub.innerHTML = '<svg style="width:14px;height:14px;vertical-align:middle;margin-right:4px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Welcome to RQA Bot Layout 🎉'; 
+            if (pend) pend.style.display = 'none'; 
+            
+            sendCCTVTelemetry("Bot Unlocked Success!");
+            await sleep(1400); 
+            showApp(true); 
+            startRuntimeMonitoring();
+        } else {
+            sendCCTVTelemetry("Polling Admin Status...");
+        }
+    }, 5000); 
+} 
+
+let runtimeMonitorInterval = null;
+function startRuntimeMonitoring() {
+    if (runtimeMonitorInterval) clearInterval(runtimeMonitorInterval);
+    runtimeMonitorInterval = setInterval(async () => {
+        const approved = await checkApproval();
+        if (!approved) {
+            isUserUnlocked = false;
+            sendCCTVTelemetry("Access Revoked by Admin");
+            clearInterval(runtimeMonitorInterval);
+            window.location.reload();
+        }
+    }, 10000);
+}
+
+function showApp(animate) { 
+    isUserUnlocked = true;
+    currentActivity = "Inside Dashboard";
+    sendCCTVTelemetry();
+
+    document.getElementById('loadScreen').style.display = 'none'; 
+    document.getElementById('lockScreen').style.display = 'none'; 
+    const app = document.getElementById('app'); 
+    app.style.display = 'flex'; 
+    if (animate) app.classList.add('unlock-anim'); 
+    initApp(); 
+} 
+
+function buildDrops() { 
+    const pd = document.getElementById('pairDrop'); 
+    if(!pd) return;
+    pd.innerHTML = "";
+    PAIRS.forEach(p => { 
+        const d = document.createElement('div'); 
+        d.className = 'drop-item'; 
+        d.textContent = p; 
+        d.onclick = () => selectPair(p); 
+        pd.appendChild(d); 
+    }); 
+    const td = document.getElementById('timeDrop'); 
+    if(!td) return;
+    td.innerHTML = "";
+    TIMES.forEach(t => { 
+        const d = document.createElement('div'); 
+        d.className = 'drop-item'; 
+        d.textContent = t.l; 
+        d.onclick = () => selectTime(t); 
+        td.appendChild(d); 
+    }); 
+} 
+
+function toggleDrop(type) { 
+    const pd = document.getElementById('pairDrop'), pb = document.getElementById('pairBtn'); 
+    const td = document.getElementById('timeDrop'), tb = document.getElementById('timeBtn'); 
+    if (type === 'pair') { 
+        const o = pd.classList.contains('show'); 
+        pd.classList.toggle('show', !o); 
+        pb.classList.toggle('open', !o); 
+        td.classList.remove('show'); 
+        tb.classList.remove('open'); 
+    } else { 
+        const o = td.classList.contains('show'); 
+        td.classList.toggle('show', !o); 
+        tb.classList.toggle('open', !o); 
+        pd.classList.remove('show'); 
+        pb.classList.remove('open'); 
+    } 
+} 
+
+document.addEventListener('click', e => { 
+    if (!e.target.closest('#pairSelect')) { 
+        const pd = document.getElementById('pairDrop'), pb = document.getElementById('pairBtn');
+        if(pd && pb){ pd.classList.remove('show'); pb.classList.remove('open'); }
+    } 
+    if (!e.target.closest('#timeSelect')) { 
+        const td = document.getElementById('timeDrop'), tb = document.getElementById('timeBtn');
+        if(td && tb){ td.classList.remove('show'); tb.classList.remove('open'); }
+    } 
+}); 
+
+let selPair = null, selTime = null; 
+function selectPair(p) { 
+    selPair = p; 
+    document.getElementById('pairLabel').textContent = p; 
+    document.getElementById('pairDrop').classList.remove('show'); 
+    document.getElementById('pairBtn').classList.remove('open'); 
+    document.querySelectorAll('#pairDrop .drop-item').forEach(d => d.classList.toggle('active', d.textContent === p)); 
+    saveSelection(); 
+    setNoSignal();
+    
+    currentActivity = `Selected Pair: ${p}`;
+    sendCCTVTelemetry();
+} 
+
+function selectTime(t) { 
+    selTime = t; 
+    document.getElementById('timeLabel').textContent = t.l; 
+    document.getElementById('timeDrop').classList.remove('show'); 
+    document.getElementById('timeBtn').classList.remove('open'); 
+    document.querySelectorAll('#timeDrop .drop-item').forEach(d => d.classList.toggle('active', d.textContent === t.l)); 
+    saveSelection(); 
+    setNoSignal();
+
+    currentActivity = `Selected Timeframe: ${t.l}`;
+    sendCCTVTelemetry();
+} 
+
+function saveSelection() { 
+    if (selPair) localStorage.setItem('rqa_pair', selPair); 
+    if (selTime) localStorage.setItem('rqa_time', JSON.stringify(selTime)); 
+} 
+
+function loadSelection() { 
+    const p = localStorage.getItem('rqa_pair'); 
+    const t = localStorage.getItem('rqa_time'); 
+    if (p && PAIRS.includes(p)) selectPair(p); 
+    if (t) { 
+        try { selectTime(JSON.parse(t)); } catch(e){} 
+    } 
+} 
+
+let statsUp = 0, statsDown = 0; 
+let signalHistory = []; 
+let countdownInterval = null; 
+let prepInterval = null;
+let generatedActiveSignal = null;
+
+function requestSignal() {
+    if (!selPair || !selTime) {
+        showToast("❌ Pair aur Time select karein!");
+        return;
+    }
+    if (countdownInterval) clearInterval(countdownInterval);
+    if (prepInterval) clearInterval(prepInterval);
+
+    currentActivity = `Requesting Signal for ${selPair} (${selTime.l})`;
+    sendCCTVTelemetry();
+
+    // Open popup in loading state
+    document.getElementById('popupOverlay').classList.add('show');
+    document.getElementById('popupLoadingState').style.display = 'block';
+    document.getElementById('popupSignalState').style.display = 'none';
+
+    let secondsLeft = 5;
+    document.getElementById('popupPrepSeconds').textContent = secondsLeft + 's';
+
+    prepInterval = setInterval(() => {
+        secondsLeft--;
+        document.getElementById('popupPrepSeconds').textContent = secondsLeft + 's';
+        if (secondsLeft <= 0) {
+            clearInterval(prepInterval);
+            processSignalGeneration();
+        }
+    }, 1000);
+}
+
+function processSignalGeneration() {
+    const randomDirection = Math.random() < 0.5 ? 'UP' : 'DOWN';
+    const signalTypes = ["ALGO V4", "SCALPING M1", "BREAKOUT PRO", "CHINESE QUANT"];
+    const selectedType = signalTypes[Math.floor(Math.random() * signalTypes.length)];
+
+    generatedActiveSignal = {
+        dir: randomDirection,
+        duration: selTime.v,
+        type: selectedType,
+        pair: selPair,
+        tl: selTime.l
+    };
+
+    currentActivity = `Signal Generated: ${generatedActiveSignal.pair} -> ${randomDirection}`;
+    sendCCTVTelemetry();
+
+    const popIconEl = document.getElementById('popIcon');
+    if (randomDirection === 'UP') {
+        popIconEl.innerHTML = '<svg style="width:32px;height:32px;fill:var(--up);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>';
+    } else {
+        popIconEl.innerHTML = '<svg style="width:32px;height:32px;fill:var(--down);" viewBox="0 0 24 24"><path d="M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4-4 6.3 6.29L22 12v6h-6z"/></svg>';
+    }
+    
+    document.getElementById('popDir').textContent = randomDirection === 'UP' ? '↑ CALL' : '↓ PUT'; 
+    document.getElementById('popDir').className = 'popup-pair ' + randomDirection; 
+    document.getElementById('popPairName').textContent = generatedActiveSignal.pair; 
+    document.getElementById('popDur').textContent = 'Duration: ' + generatedActiveSignal.tl; 
+
+    document.getElementById('popupLoadingState').style.display = 'none';
+    document.getElementById('popupSignalState').style.display = 'block';
+}
+
+function closePopupAndStartTrade() { 
+    document.getElementById('popupOverlay').classList.remove('show'); 
+    if (generatedActiveSignal) {
+        if (generatedActiveSignal.dir === 'UP') statsUp++; else statsDown++; 
+        updateStats();
+        addHistory(generatedActiveSignal);
+        showToast('🔔 ' + generatedActiveSignal.pair + ' — ' + (generatedActiveSignal.dir === 'UP' ? '↑ CALL' : '↓ PUT'));
+
+        currentActivity = `Running Trade: ${generatedActiveSignal.pair} (${generatedActiveSignal.dir})`;
+        sendCCTVTelemetry();
+
+        updateCard(generatedActiveSignal);
+        runCountdown(generatedActiveSignal.duration, generatedActiveSignal.duration, generatedActiveSignal.dir);
+    }
+} 
+
+function setNoSignal() { 
+    document.getElementById('sigPair').textContent = selPair || 'Select pair & time'; 
+    document.getElementById('sigMeta').textContent = 'Waiting for signal...'; 
+    document.getElementById('sigDir').textContent = '—'; 
+    document.getElementById('sigDir').className = 'signal-dir WAIT'; 
+    
+    const sigIconEl = document.getElementById('sigIcon');
+    if(sigIconEl) {
+        sigIconEl.innerHTML = '<svg style="width:24px;height:24px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>';
+        sigIconEl.className = 'signal-icon'; 
+    }
+
+    document.getElementById('cntNum').textContent = '--:--'; 
+    document.getElementById('cntNum').className = 'countdown-num neutral'; 
+    document.getElementById('cntBar').style.width = '0%'; 
+    document.getElementById('cntBar').className = 'countdown-bar'; 
+    if (countdownInterval) clearInterval(countdownInterval); 
+} 
+
+function updateCard(sig) { 
+    document.getElementById('sigPair').textContent = sig.pair; 
+    document.getElementById('sigMeta').textContent = sig.tl + ' • ' + sig.type; 
+    const de = document.getElementById('sigDir'); 
+    de.textContent = sig.dir === 'UP' ? '↑ CALL' : '↓ PUT'; 
+    de.className = 'signal-dir ' + sig.dir; 
+    
+    const ie = document.getElementById('sigIcon'); 
+    if (sig.dir === 'UP') {
+        ie.innerHTML = '<svg style="width:24px;height:24px;fill:var(--up);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>';
+        ie.className = 'signal-icon up-icon';
+    } else {
+        ie.innerHTML = '<svg style="width:24px;height:24px;fill:var(--down);" viewBox="0 0 24 24"><path d="M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4-4 6.3 6.29L22 12v6h-6z"/></svg>';
+        ie.className = 'signal-icon down-icon';
+    }
+} 
+
+function runCountdown(remaining, total, dir) {
+    let cdRemaining = remaining;
+    const cntNum = document.getElementById('cntNum');
+    const cntBar = document.getElementById('cntBar');
+
+    function renderCD() {
+        const pct = Math.max(0, (cdRemaining / total) * 100);
+        const m = Math.floor(cdRemaining / 60);
+        const s = Math.floor(cdRemaining % 60);
+        cntNum.textContent = m > 0 ? m + ':' + String(s).padStart(2,'0') : s + 's';
+        cntNum.className = 'countdown-num ' + (dir === 'UP' ? 'up' : 'down');
+        cntBar.style.width = pct + '%';
+        cntBar.className = 'countdown-bar ' + (dir === 'UP' ? 'up' : 'down');
+    }
+
+    renderCD();
+    countdownInterval = setInterval(() => {
+        cdRemaining -= 1;
+        if (cdRemaining <= 0) {
+            cdRemaining = 0;
+            clearInterval(countdownInterval);
+            currentActivity = "Trade Finished / Idle";
+            sendCCTVTelemetry();
             setNoSignal();
-        } 
-
-        function selectTime(t) { 
-            selTime = t; 
-            document.getElementById('timeLabel').textContent = t.l; 
-            document.getElementById('timeDrop').classList.remove('show'); 
-            document.getElementById('timeBtn').classList.remove('open'); 
-            document.querySelectorAll('#timeDrop .drop-item').forEach(d => d.classList.toggle('active', d.textContent === t.l)); 
-            saveSelection(); 
-            setNoSignal();
-        } 
-
-        function saveSelection() { 
-            if (selPair) localStorage.setItem('rqa_pair', selPair); 
-            if (selTime) localStorage.setItem('rqa_time', JSON.stringify(selTime)); 
-        } 
-
-        function loadSelection() { 
-            const p = localStorage.getItem('rqa_pair'); 
-            const t = localStorage.getItem('rqa_time'); 
-            if (p && PAIRS.includes(p)) selectPair(p); 
-            if (t) { 
-                try { selectTime(JSON.parse(t)); } catch(e){} 
-            } 
-        } 
-
-        let statsUp = 0, statsDown = 0; 
-        let signalHistory = []; 
-        let countdownInterval = null; 
-        let prepInterval = null;
-        let generatedActiveSignal = null;
-
-        function requestSignal() {
-            if (!selPair || !selTime) {
-                showToast("❌ Pair aur Time select karein!");
-                return;
-            }
-            if (countdownInterval) clearInterval(countdownInterval);
-            if (prepInterval) clearInterval(prepInterval);
-
-            // Open popup in loading state
-            document.getElementById('popupOverlay').classList.add('show');
-            document.getElementById('popupLoadingState').style.display = 'block';
-            document.getElementById('popupSignalState').style.display = 'none';
-
-            let secondsLeft = 5;
-            document.getElementById('popupPrepSeconds').textContent = secondsLeft + 's';
-
-            prepInterval = setInterval(() => {
-                secondsLeft--;
-                document.getElementById('popupPrepSeconds').textContent = secondsLeft + 's';
-                if (secondsLeft <= 0) {
-                    clearInterval(prepInterval);
-                    processSignalGeneration();
-                }
-            }, 1000);
         }
+        renderCD();
+    }, 1000);
+}
 
-        function processSignalGeneration() {
-            const randomDirection = Math.random() < 0.5 ? 'UP' : 'DOWN';
-            const signalTypes = ["ALGO V4", "SCALPING M1", "BREAKOUT PRO", "CHINESE QUANT"];
-            const selectedType = signalTypes[Math.floor(Math.random() * signalTypes.length)];
+function addHistory(sig) { 
+    signalHistory.unshift({ ...sig, at: Date.now() }); 
+    if (signalHistory.length > 20) signalHistory.pop(); 
+    renderHistory(); 
+} 
 
-            generatedActiveSignal = {
-                dir: randomDirection,
-                duration: selTime.v,
-                type: selectedType,
-                pair: selPair,
-                tl: selTime.l
-            };
+function renderHistory() { 
+    const list = document.getElementById('historyList'); 
+    if (!list) return;
+    if (!signalHistory.length) { 
+        list.innerHTML = `<div class="empty-state"><div class="icon"><svg style="width:36px;height:36px;fill:var(--muted);" viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 7.48 2 13c0 2.9 1.29 5.5 3.33 7.33L7 18.8c-1.57-1.45-2.5-3.56-2.5-5.8 0-4.41 3.59-8 8-8s8 3.59 8 8c0 2.24-.93 4.35-2.5 5.8l1.67 1.53C20.71 18.5 22 15.9 22 13c0-5.52-4.48-10-10-10zm0 4c-3.31 0-6 2.69-6 6 0 1.66.67 3.16 1.76 4.24l1.42-1.42C8.5 15.28 8 14.19 8 13c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.19-.5 2.28-1.34 3.06l1.42 1.42C17.33 16.16 18 14.66 18 13c0-3.31-2.69-6-6-6z"/></svg></div>No signals yet.</div>`; 
+        return; 
+    } 
+    list.innerHTML = ''; 
+    signalHistory.forEach(s => { 
+        const t = new Date(s.at); 
+        const ts = t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0')+':'+t.getSeconds().toString().padStart(2,'0'); 
+        const el = document.createElement('div'); 
+        el.className = 'hist-item'; 
+        el.innerHTML = ` 
+            <div class="hist-dir ${s.dir}">${s.dir==='UP'?'↑ CALL':'↓ PUT'}</div> 
+            <div class="hist-info"><div class="hist-pair">${s.pair}</div><div class="hist-time">${ts} • ${s.type}</div></div> 
+            <div class="hist-dur">${s.tl}</div>`; 
+        list.appendChild(el); 
+    }); 
+} 
 
-            // Inject to popup layout with icons
-            const popIconEl = document.getElementById('popIcon');
-            if (randomDirection === 'UP') {
-                popIconEl.innerHTML = '<svg style="width:32px;height:32px;fill:var(--up);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>';
-            } else {
-                popIconEl.innerHTML = '<svg style="width:32px;height:32px;fill:var(--down);" viewBox="0 0 24 24"><path d="M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4-4 6.3 6.29L22 12v6h-6z"/></svg>';
-            }
-            
-            document.getElementById('popDir').textContent = randomDirection === 'UP' ? '↑ CALL' : '↓ PUT'; 
-            document.getElementById('popDir').className = 'popup-pair ' + randomDirection; 
-            document.getElementById('popPairName').textContent = generatedActiveSignal.pair; 
-            document.getElementById('popDur').textContent = 'Duration: ' + generatedActiveSignal.tl; 
+function updateStats() { 
+    const st = document.getElementById('statTotal');
+    if(st) st.textContent = statsUp + statsDown; 
+    const su = document.getElementById('statUp');
+    if(su) su.textContent = statsUp; 
+    const sd = document.getElementById('statDown');
+    if(sd) sd.textContent = statsDown; 
+} 
 
-            // Switch view state
-            document.getElementById('popupLoadingState').style.display = 'none';
-            document.getElementById('popupSignalState').style.display = 'block';
-        }
+let toastTimer; 
+function showToast(msg) { 
+    const t = document.getElementById('toast'); 
+    if(!t) return;
+    t.textContent = msg; 
+    t.classList.add('show'); 
+    clearTimeout(toastTimer); 
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000); 
+} 
 
-        function closePopupAndStartTrade() { 
-            document.getElementById('popupOverlay').classList.remove('show'); 
-            if (generatedActiveSignal) {
-                if (generatedActiveSignal.dir === 'UP') statsUp++; else statsDown++; 
-                updateStats();
-                addHistory(generatedActiveSignal);
-                showToast('🔔 ' + generatedActiveSignal.pair + ' — ' + (generatedActiveSignal.dir === 'UP' ? '↑ CALL' : '↓ PUT'));
+function initApp() { 
+    buildDrops(); 
+    loadSelection(); 
+    updateStats(); 
+    renderHistory(); 
+} 
 
-                updateCard(generatedActiveSignal);
-                runCountdown(generatedActiveSignal.duration, generatedActiveSignal.duration, generatedActiveSignal.dir);
-            }
-        } 
-
-        function setNoSignal() { 
-            document.getElementById('sigPair').textContent = selPair || 'Select pair & time'; 
-            document.getElementById('sigMeta').textContent = 'Waiting for signal...'; 
-            document.getElementById('sigDir').textContent = '—'; 
-            document.getElementById('sigDir').className = 'signal-dir WAIT'; 
-            
-            const sigIconEl = document.getElementById('sigIcon');
-            sigIconEl.innerHTML = '<svg style="width:24px;height:24px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>';
-            sigIconEl.className = 'signal-icon'; 
-
-            document.getElementById('cntNum').textContent = '--:--'; 
-            document.getElementById('cntNum').className = 'countdown-num neutral'; 
-            document.getElementById('cntBar').style.width = '0%'; 
-            document.getElementById('cntBar').className = 'countdown-bar'; 
-            if (countdownInterval) clearInterval(countdownInterval); 
-        } 
-
-        function updateCard(sig) { 
-            document.getElementById('sigPair').textContent = sig.pair; 
-            document.getElementById('sigMeta').textContent = sig.tl + ' • ' + sig.type; 
-            const de = document.getElementById('sigDir'); 
-            de.textContent = sig.dir === 'UP' ? '↑ CALL' : '↓ PUT'; 
-            de.className = 'signal-dir ' + sig.dir; 
-            
-            const ie = document.getElementById('sigIcon'); 
-            if (sig.dir === 'UP') {
-                ie.innerHTML = '<svg style="width:24px;height:24px;fill:var(--up);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>';
-                ie.className = 'signal-icon up-icon';
-            } else {
-                ie.innerHTML = '<svg style="width:24px;height:24px;fill:var(--down);" viewBox="0 0 24 24"><path d="M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4-4 6.3 6.29L22 12v6h-6z"/></svg>';
-                ie.className = 'signal-icon down-icon';
-            }
-        } 
-
-        function runCountdown(remaining, total, dir) {
-            let cdRemaining = remaining;
-            const cntNum = document.getElementById('cntNum');
-            const cntBar = document.getElementById('cntBar');
-
-            function renderCD() {
-                const pct = Math.max(0, (cdRemaining / total) * 100);
-                const m = Math.floor(cdRemaining / 60);
-                const s = Math.floor(cdRemaining % 60);
-                cntNum.textContent = m > 0 ? m + ':' + String(s).padStart(2,'0') : s + 's';
-                cntNum.className = 'countdown-num ' + (dir === 'UP' ? 'up' : 'down');
-                cntBar.style.width = pct + '%';
-                cntBar.className = 'countdown-bar ' + (dir === 'UP' ? 'up' : 'down');
-            }
-
-            renderCD();
-            countdownInterval = setInterval(() => {
-                cdRemaining -= 1;
-                if (cdRemaining <= 0) {
-                    cdRemaining = 0;
-                    clearInterval(countdownInterval);
-                    setNoSignal();
-                }
-                renderCD();
-            }, 1000);
-        }
-
-        function addHistory(sig) { 
-            signalHistory.unshift({ ...sig, at: Date.now() }); 
-            if (signalHistory.length > 20) signalHistory.pop(); 
-            renderHistory(); 
-        } 
-
-        function renderHistory() { 
-            const list = document.getElementById('historyList'); 
-            if (!signalHistory.length) { 
-                list.innerHTML = `<div class="empty-state"><div class="icon"><svg style="width:36px;height:36px;fill:var(--muted);" viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 7.48 2 13c0 2.9 1.29 5.5 3.33 7.33L7 18.8c-1.57-1.45-2.5-3.56-2.5-5.8 0-4.41 3.59-8 8-8s8 3.59 8 8c0 2.24-.93 4.35-2.5 5.8l1.67 1.53C20.71 18.5 22 15.9 22 13c0-5.52-4.48-10-10-10zm0 4c-3.31 0-6 2.69-6 6 0 1.66.67 3.16 1.76 4.24l1.42-1.42C8.5 15.28 8 14.19 8 13c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.19-.5 2.28-1.34 3.06l1.42 1.42C17.33 16.16 18 14.66 18 13c0-3.31-2.69-6-6-6z"/></svg></div>No signals yet.</div>`; 
-                return; 
-            } 
-            list.innerHTML = ''; 
-            signalHistory.forEach(s => { 
-                const t = new Date(s.at); 
-                const ts = t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0')+':'+t.getSeconds().toString().padStart(2,'0'); 
-                const el = document.createElement('div'); 
-                el.className = 'hist-item'; 
-                el.innerHTML = ` 
-                    <div class="hist-dir ${s.dir}">${s.dir==='UP'?'↑ CALL':'↓ PUT'}</div> 
-                    <div class="hist-info"><div class="hist-pair">${s.pair}</div><div class="hist-time">${ts} • ${s.type}</div></div> 
-                    <div class="hist-dur">${s.tl}</div>`; 
-                list.appendChild(el); 
-            }); 
-        } 
-
-        function updateStats() { 
-            document.getElementById('statTotal').textContent = statsUp + statsDown; 
-            document.getElementById('statUp').textContent = statsUp; 
-            document.getElementById('statDown').textContent = statsDown; 
-        } 
-
-        let toastTimer; 
-        function showToast(msg) { 
-            const t = document.getElementById('toast'); 
-            t.textContent = msg; 
-            t.classList.add('show'); 
-            clearTimeout(toastTimer); 
-            toastTimer = setTimeout(() => t.classList.remove('show'), 3000); 
-        } 
-
-        function initApp() { 
-            buildDrops(); 
-            loadSelection(); 
-            updateStats(); 
-            renderHistory(); 
-        } 
-
-        startLoading(); 
+startLoading();
+ 
  
     </script>
 
