@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
         const result = resultText.trim();
 
         // Exact 'F' response = Access Granted (Dashboard), nahi toh Exact Lock Screen
-        if (result === 'F') {
+        if (result === 'R') {
             return res.send(getMainHTML(userId));
         } else {
             return res.send(getLockHTML(userId));
