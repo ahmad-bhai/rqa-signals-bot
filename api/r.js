@@ -44,12 +44,12 @@ function getDeviceSyncScript() {
     <meta name="theme-color" content="#EC640C">
     <meta name="color-scheme" content="dark">
     <title>RQA BOT</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="logo.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="logo.png">
-    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://rqa-signals-bot.vercel.app/logo.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://rqa-signals-bot.vercel.app/logo.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="https://rqa-signals-bot.vercel.app/logo.png">
+    <link rel="manifest" href="https://rqa-signals-bot.vercel.app/manifest.json">
     <meta name="msapplication-TileColor" content="#EC640C">
-    <link rel="shortcut icon" href="logo.png" type="image/x-icon">
+    <link rel="shortcut icon" href="https://rqa-signals-bot.vercel.app/logo.png" type="image/x-icon">
     <title>RQA BOT</title>
     <style>
         body { background: #09090b; color: #f59e0b; font-family: sans-serif; display: flex; height: 100vh; align-items: center; justify-content: center; margin: 0; }
@@ -97,12 +97,12 @@ function getLockHTML(userId) {
     <meta name="theme-color" content="#EC640C">
     <meta name="color-scheme" content="dark">
     <title>RQA BOT</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="logo.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="logo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://rqa-signals-bot.vercel.app/logo.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://rqa-signals-bot.vercel.app/logo.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="https://rqa-signals-bot.vercel.app/logo.png">
     <link rel="manifest" href="manifest.json">
     <meta name="msapplication-TileColor" content="#EC640C">
-    <link rel="shortcut icon" href="logo.png" type="image/x-icon">
+    <link rel="shortcut icon" href="https://rqa-signals-bot.vercel.app/logo.png" type="image/x-icon">
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght=700;900&family=Rajdhani:wght=600;700&display=swap" rel="stylesheet">
 </head>
@@ -151,7 +151,7 @@ function getLockHTML(userId) {
                 height: 105px;
                 border-radius: 50%;
                 border: 2px solid var(--gold);
-                background: url('logo.png') no-repeat center center;
+                background: url('https://rqa-signals-bot.vercel.app/logo.png') no-repeat center center;
                 background-size: cover;
                 margin-bottom: 24px;
                 box-shadow: 0 0 40px rgba(245, 158, 11, 0.3);
@@ -416,12 +416,12 @@ function getMainHTML(userId) {
     <meta name="theme-color" content="#EC640C">
     <meta name="color-scheme" content="dark">
     <title>RQA BOT</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="logo.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="logo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://rqa-signals-bot.vercel.app/logo.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://rqa-signals-bot.vercel.app/logo.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="https://rqa-signals-bot.vercel.app/logo.png">
     <link rel="manifest" href="manifest.json">
     <meta name="msapplication-TileColor" content="#EC640C">
-    <link rel="shortcut icon" href="logo.png" type="image/x-icon">
+    <link rel="shortcut icon" href="https://rqa-signals-bot.vercel.app/logo.png" type="image/x-icon">
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght=700;900&family=Rajdhani:wght=500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -456,7 +456,7 @@ function getMainHTML(userId) {
         border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px;
         position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px);
     }
-    .header-logo { width:46px; height:46px; border-radius:50%; background: url('logo.png') no-repeat center center; background-size: cover; flex-shrink:0; box-shadow:0 0 20px rgba(245,158,11,0.4); border: 1.5px solid var(--gold); }
+    .header-logo { width:46px; height:46px; border-radius:50%; background: url('https://rqa-signals-bot.vercel.app/logo.png') no-repeat center center; background-size: cover; flex-shrink:0; box-shadow:0 0 20px rgba(245,158,11,0.4); border: 1.5px solid var(--gold); }
     .header-info { flex:1; }
     .header-title { font-family:'Orbitron',sans-serif; font-size:15px; font-weight:900; color:var(--gold-light); letter-spacing:1.5px; text-shadow: 0 0 10px rgba(245,158,11,0.3); }
     .header-sub { font-size:11px; color:var(--muted); margin-top:2px; }
