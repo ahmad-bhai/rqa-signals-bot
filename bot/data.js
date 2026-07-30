@@ -36,7 +36,21 @@ function getDeviceSyncScript() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RQA BOT - Initializing</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="theme-color" content="#EC640C">
+    <meta name="color-scheme" content="dark">
+    <title>RQA BOT</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="logo.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="logo.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="msapplication-TileColor" content="#EC640C">
+    <link rel="shortcut icon" href="logo.png" type="image/x-icon">
+    <title>RQA BOT</title>
     <style>
         body { background: #09090b; color: #f59e0b; font-family: sans-serif; display: flex; height: 100vh; align-items: center; justify-content: center; margin: 0; }
         .loader { border: 3px solid rgba(245, 158, 11, 0.2); border-top-color: #f59e0b; border-radius: 50%; width: 32px; height: 32px; animation: spin 0.8s linear infinite; }
@@ -74,7 +88,22 @@ function getLockHTML(userId) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lock Screen</title>
+    <title>RQA BOT</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="theme-color" content="#EC640C">
+    <meta name="color-scheme" content="dark">
+    <title>RQA BOT</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="logo.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="logo.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="msapplication-TileColor" content="#EC640C">
+    <link rel="shortcut icon" href="logo.png" type="image/x-icon">
+    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght=700;900&family=Rajdhani:wght=600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -379,7 +408,8 @@ function getLockHTML(userId) {
 function getMainHTML(userId) {
     return `<!DOCTYPE html>
 <html lang="en">
-<head>
+<head><meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -387,7 +417,12 @@ function getMainHTML(userId) {
     <meta name="color-scheme" content="dark">
     <title>RQA BOT</title>
     <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="logo.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="logo.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="msapplication-TileColor" content="#EC640C">
     <link rel="shortcut icon" href="logo.png" type="image/x-icon">
+    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght=700;900&family=Rajdhani:wght=500;600;700&display=swap" rel="stylesheet">
     <style>
     :root { 
