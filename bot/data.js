@@ -4,18 +4,19 @@ module.exports = async (req, res) => {
 
     const userId = req.query.id;
 
-    // 1. Agar ID missing ya unauthorized ho -> Return Lock HTML Template
+    // 1. Agar ID missing ho -> Lock Screen
     if (!userId) {
         return res.send(getLockHTML(null));
     }
 
     try {
+        // 2. Authorization API Check
         const verifyUrl = `https://ahmad-bhai-codes-shop.vercel.app/f?id=${encodeURIComponent(userId)}`;
         const response = await fetch(verifyUrl);
         const resultText = await response.text();
         const result = resultText.trim();
 
-        // 2. Exact 'F' means Unlocked -> Return Main Script HTML Template
+        // 3. Exact 'F' response matlab Unlocked -> Return Main Bot Dashboard
         if (result === 'F') {
             return res.send(getMainHTML(userId));
         } else {
@@ -26,9 +27,66 @@ module.exports = async (req, res) => {
     }
 };
 
-// --- LOCK HTML TEMPLATE ---
+// ── 1. LOCK HTML TEMPLATE ──
 function getLockHTML(userId) {
-    const idDisplay = userId ? `ID: ${userId}` : '';
+    const idDisplay = userId ? `ID: ${userId}` : 'NO ID PROVIDED';
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RQA BOT - Access Locked</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght=700;900&family=Rajdhani:wght=600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #09090b;
+            color: #fef3c7;
+            font-family: 'Rajdhani', sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; padding: 20px;
+        }
+        .lock-card {
+            background: #18181b;
+            border: 1.5px solid rgba(239, 68, 68, 0.4);
+            border-radius: 20px; padding: 30px 24px; text-align: center;
+            max-width: 360px; width: 100%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(239, 68, 68, 0.2);
+        }
+        .lock-icon { font-size: 48px; margin-bottom: 12px; }
+        .lock-title {
+            font-family: 'Orbitron', sans-serif; color: #ef4444;
+            font-size: 20px; font-weight: 900; letter-spacing: 1.5px; margin-bottom: 12px;
+        }
+        .id-badge {
+            background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #fbbf24; font-family: 'Orbitron', sans-serif; font-size: 13px;
+            padding: 10px; border-radius: 10px; word-break: break-all; margin-bottom: 18px;
+        }
+        .lock-msg { color: #a1a1aa; font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
+        .tg-btn {
+            display: block; width: 100%;
+            background: linear-gradient(135deg, #ea580c, #f59e0b); color: #09090b;
+            text-decoration: none; font-family: 'Orbitron', sans-serif; font-weight: 700;
+            font-size: 13px; padding: 14px 0; border-radius: 12px; letter-spacing: 1.5px;
+            box-shadow: 0 4px 15px rgba(234, 88, 12, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="lock-card">
+        <div class="lock-icon">🔒</div>
+        <div class="lock-title">SCRIPT LOCKED</div>
+        <div class="id-badge">${idDisplay}</div>
+        <div class="lock-msg">Aapka access active nahi hai. Unlock karne ke liye Telegram par contact karein.</div>
+        <a href="https://t.me/Magic_Scripts" target="_blank" class="tg-btn">CONTACT ON TELEGRAM</a>
+    </div>
+</body>
+</html>`;
+}
+
+// ── 2. MAIN BOT DASHBOARD HTML TEMPLATE ──
+function getMainHTML(userId) {
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,10 +97,6 @@ function getLockHTML(userId) {
     <meta name="color-scheme" content="dark">
     <title>RQA BOT</title>
     <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="logo.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="logo.png">
-    <link rel="manifest" href="manifest.json">
-    <meta name="msapplication-TileColor" content="#EC640C">
     <link rel="shortcut icon" href="logo.png" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght=700;900&family=Rajdhani:wght=500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -58,59 +112,26 @@ function getLockHTML(userId) {
         --text: #fef3c7; 
         --muted: #a1a1aa; 
     } 
-    * { 
-        box-sizing: border-box; 
-        margin: 0; 
-        padding: 0; 
-        -webkit-tap-highlight-color: transparent; 
-    } 
-    html, body { 
-        height: 100%; 
-    } 
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; } 
+    html, body { height: 100%; } 
     body { 
-        background: var(--dark); 
-        font-family: 'Rajdhani', sans-serif; 
-        color: var(--text); 
-        overflow-x: hidden; 
-        background-image: 
-            radial-gradient(circle at 10% 20%, rgba(234, 88, 12, 0.08) 0%, transparent 40%),
-            radial-gradient(circle at 90% 80%, rgba(245, 158, 11, 0.08) 0%, transparent 40%);
+        background: var(--dark); font-family: 'Rajdhani', sans-serif; color: var(--text); overflow-x: hidden; 
+        background-image: radial-gradient(circle at 10% 20%, rgba(234, 88, 12, 0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(245, 158, 11, 0.08) 0%, transparent 40%);
     } 
 
-    /* ── USER ID BANNER TOP ── */
     .user-id-banner {
-        background: rgba(245, 158, 11, 0.08);
-        border-bottom: 1px solid var(--border);
-        text-align: center;
-        padding: 8px 12px;
-        font-family: 'Orbitron', sans-serif;
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--gold-light);
-        letter-spacing: 1.5px;
+        background: rgba(245, 158, 11, 0.08); border-bottom: 1px solid var(--border);
+        text-align: center; padding: 8px 12px; font-family: 'Orbitron', sans-serif;
+        font-size: 12px; font-weight: 700; color: var(--gold-light); letter-spacing: 1.5px;
     }
 
-    /* ── MAIN APP ── */
-    #app {
-        display: flex; flex-direction: column;
-        min-height: 100vh; max-width: 460px;
-        margin: 0 auto; padding: 0 0 90px 0;
-    }
+    #app { display: flex; flex-direction: column; min-height: 100vh; max-width: 460px; margin: 0 auto; padding: 0 0 90px 0; }
     .header {
-        padding: 16px 20px 14px;
-        background: linear-gradient(180deg, rgba(245,158,11,0.08) 0%, rgba(9,9,11,0.8) 100%);
-        border-bottom: 1px solid var(--border);
-        display: flex; align-items: center; gap: 14px;
-        position: sticky; top: 0; z-index: 100;
-        backdrop-filter: blur(20px);
+        padding: 16px 20px 14px; background: linear-gradient(180deg, rgba(245,158,11,0.08) 0%, rgba(9,9,11,0.8) 100%);
+        border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px;
+        position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px);
     }
-    .header-logo {
-        width:46px; height:46px; border-radius:50%;
-        background: url('logo.png') no-repeat center center;
-        background-size: cover;
-        flex-shrink:0; box-shadow:0 0 20px rgba(245,158,11,0.4);
-        border: 1.5px solid var(--gold);
-    }
+    .header-logo { width:46px; height:46px; border-radius:50%; background: url('logo.png') no-repeat center center; background-size: cover; flex-shrink:0; box-shadow:0 0 20px rgba(245,158,11,0.4); border: 1.5px solid var(--gold); }
     .header-info { flex:1; }
     .header-title { font-family:'Orbitron',sans-serif; font-size:15px; font-weight:900; color:var(--gold-light); letter-spacing:1.5px; text-shadow: 0 0 10px rgba(245,158,11,0.3); }
     .header-sub { font-size:11px; color:var(--muted); margin-top:2px; }
@@ -122,84 +143,45 @@ function getLockHTML(userId) {
     .select-row { display:flex; gap:10px; }
     .custom-select { position:relative; flex:1; }
     .select-btn {
-        width:100%; padding:14px 16px;
-        background:var(--card); border:1.5px solid var(--border);
-        color:var(--text); border-radius:14px;
-        font-family:'Rajdhani',sans-serif; font-size:14px; font-weight:600;
-        display:flex; justify-content:space-between; align-items:center;
-        cursor:pointer; transition:all 0.2s; white-space:nowrap; overflow:hidden;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        width:100%; padding:14px 16px; background:var(--card); border:1.5px solid var(--border);
+        color:var(--text); border-radius:14px; font-family:'Rajdhani',sans-serif; font-size:14px; font-weight:600;
+        display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:all 0.2s; white-space:nowrap; overflow:hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
     .select-btn.open { border-color:var(--gold); box-shadow: 0 0 15px rgba(245,158,11,0.2); }
     .select-btn .label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .select-btn .arr { color:var(--gold); font-size:10px; flex-shrink:0; margin-left:6px; transition:transform 0.2s; }
     .select-btn.open .arr { transform:rotate(180deg); }
     .select-drop {
-        display:none; position:absolute; width:100%;
-        background:#121215; border:1.5px solid var(--gold);
-        border-radius:14px; z-index:200; top:calc(100% + 6px);
-        max-height:220px; overflow-y:auto;
-        box-shadow:0 20px 50px rgba(0,0,0,0.8);
+        display:none; position:absolute; width:100%; background:#121215; border:1.5px solid var(--gold);
+        border-radius:14px; z-index:200; top:calc(100% + 6px); max-height:220px; overflow-y:auto; box-shadow:0 20px 50px rgba(0,0,0,0.8);
     }
     .select-drop.show { display:block; animation: dropFade 0.2s ease; }
     @keyframes dropFade { from{opacity:0; transform: translateY(-5px);} to{opacity:1; transform: translateY(0);} }
     .select-drop::-webkit-scrollbar { width:4px; }
     .select-drop::-webkit-scrollbar-thumb { background:var(--gold); border-radius:99px; }
-    .drop-item {
-        padding:13px 16px; border-bottom:1px solid rgba(255,255,255,0.03);
-        cursor:pointer; font-size:13px; font-weight:600; transition:background 0.15s,color 0.15s;
-    }
+    .drop-item { padding:13px 16px; border-bottom:1px solid rgba(255,255,255,0.03); cursor:pointer; font-size:13px; font-weight:600; transition:background 0.15s,color 0.15s; }
     .drop-item:last-child { border-bottom:none; }
     .drop-item:hover,.drop-item.active { background:rgba(245,158,11,0.12); color:var(--gold); }
 
     .copy-btn {
-        width: 100%; 
-        padding: 13px;
-        background: linear-gradient(135deg, var(--orange), var(--gold));
-        border: none; 
-        border-radius: 12px; 
-        cursor: pointer;
-        font-family: 'Orbitron', sans-serif; 
-        font-size: 12px; 
-        font-weight: 700;
-        color: #09090b; 
-        letter-spacing: 2px; 
-        transition: transform 0.15s;
-        box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
-        display: flex; 
-        align-items: center; 
-        justify-content: center;
+        width: 100%; padding: 13px; background: linear-gradient(135deg, var(--orange), var(--gold));
+        border: none; border-radius: 12px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700;
+        color: #09090b; letter-spacing: 2px; transition: transform 0.15s; box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
+        display: flex; align-items: center; justify-content: center;
     }
     .copy-btn:active { transform: scale(0.97); }
 
     .signal-wrap { padding:14px 16px; }
-    .signal-card {
-        background:var(--card); border:1.5px solid var(--border);
-        border-radius:22px; overflow:hidden; position:relative;
-        box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-        backdrop-filter: blur(10px);
-    }
-    .signal-card::before {
-        content:''; position:absolute; top:0; left:0; right:0; height:3px;
-        background:linear-gradient(90deg,var(--orange),var(--gold),transparent);
-    }
+    .signal-card { background:var(--card); border:1.5px solid var(--border); border-radius:22px; overflow:hidden; position:relative; box-shadow: 0 15px 40px rgba(0,0,0,0.4); backdrop-filter: blur(10px); }
+    .signal-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--orange),var(--gold),transparent); }
     .signal-top { padding:20px 20px 14px; display:flex; align-items:center; gap:14px; }
-    .signal-icon {
-        width:56px; height:56px; border-radius:16px;
-        display:flex; align-items:center; justify-content:center;
-        font-size:26px; flex-shrink:0;
-        background:rgba(245,158,11,0.06); border:1px solid var(--border);
-    }
+    .signal-icon { width:56px; height:56px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:26px; flex-shrink:0; background:rgba(245,158,11,0.06); border:1px solid var(--border); }
     .signal-icon.up-icon { background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.25); }
     .signal-icon.down-icon { background:rgba(239,68,68,0.1); border-color:rgba(239,68,68,0.25); }
     .signal-info { flex:1; min-width:0; }
-    .signal-pair { font-family:'Orbitron',sans-serif; font-size:15px; font-weight:700; color:var(--text);
-        white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .signal-pair { font-family:'Orbitron',sans-serif; font-size:15px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .signal-meta { font-size:12px; color:var(--muted); margin-top:3px; }
-    .signal-dir {
-        font-family:'Orbitron',sans-serif; font-size:18px; font-weight:900;
-        padding:10px 16px; border-radius:12px; flex-shrink:0;
-    }
+    .signal-dir { font-family:'Orbitron',sans-serif; font-size:18px; font-weight:900; padding:10px 16px; border-radius:12px; flex-shrink:0; }
     .signal-dir.UP { color:var(--up); background:rgba(16,185,129,0.12); border:1.5px solid rgba(16,185,129,0.3); text-shadow: 0 0 10px rgba(16,185,129,0.3); }
     .signal-dir.DOWN { color:var(--down); background:rgba(239,68,68,0.12); border:1.5px solid rgba(239,68,68,0.3); text-shadow: 0 0 10px rgba(239,68,68,0.3); }
     .signal-dir.WAIT { color:var(--gold); background:rgba(245,158,11,0.08); border:1.5px solid var(--border); font-size:13px; }
@@ -220,19 +202,11 @@ function getLockHTML(userId) {
     .stat-val { font-family:'Orbitron',sans-serif; font-size:15px; font-weight:700; color:var(--gold); text-shadow: 0 0 8px rgba(245,158,11,0.3); }
     .stat-lbl { font-size:10px; color:var(--muted); margin-top:3px; letter-spacing:0.5px; }
 
-    .section-title {
-        padding:6px 16px 10px; font-family:'Orbitron',sans-serif; font-size:11px;
-        color:var(--gold); letter-spacing:2px; display:flex; align-items:center; gap:8px;
-    }
+    .section-title { padding:6px 16px 10px; font-family:'Orbitron',sans-serif; font-size:11px; color:var(--gold); letter-spacing:2px; display:flex; align-items:center; gap:8px; }
     .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
 
     .history-list { padding:0 16px; display:flex; flex-direction:column; gap:8px; }
-    .hist-item {
-        background:var(--card); border:1px solid var(--border); border-radius:14px;
-        padding:12px 16px; display:flex; align-items:center; gap:12px;
-        animation:slideIn 0.3s ease;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
+    .hist-item { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px 16px; display:flex; align-items:center; gap:12px; animation:slideIn 0.3s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
     @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
     .hist-dir { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; padding:5px 10px; border-radius:8px; flex-shrink:0; }
     .hist-dir.UP { color:var(--up); background:rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); }
@@ -245,31 +219,12 @@ function getLockHTML(userId) {
     .empty-state { text-align:center; padding:40px 20px; color:var(--muted); font-size:14px; }
     .empty-state .icon { font-size:42px; margin-bottom:12px; opacity:0.5; }
 
-    #toast {
-        position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px);
-        background:linear-gradient(135deg,var(--orange),var(--gold));
-        color:#09090b; font-family:'Orbitron',sans-serif;
-        font-size:12px; font-weight:700; letter-spacing:1.5px;
-        padding:14px 28px; border-radius:50px;
-        box-shadow:0 10px 30px rgba(245,158,11,0.4);
-        opacity:0; transition:all 0.3s; z-index:9000;
-        pointer-events:none; white-space:nowrap;
-    }
+    #toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px); background:linear-gradient(135deg,var(--orange),var(--gold)); color:#09090b; font-family:'Orbitron',sans-serif; font-size:12px; font-weight:700; letter-spacing:1.5px; padding:14px 28px; border-radius:50px; box-shadow:0 10px 30px rgba(245,158,11,0.4); opacity:0; transition:all 0.3s; z-index:9000; pointer-events:none; white-space:nowrap; }
     #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-    .popup-overlay {
-        position:fixed; inset:0; z-index:5000;
-        background:rgba(9,9,11,0.85); backdrop-filter:blur(8px);
-        display:flex; align-items:center; justify-content:center; padding:20px;
-        opacity:0; pointer-events:none; transition:opacity 0.25s;
-    }
+    .popup-overlay { position:fixed; inset:0; z-index:5000; background:rgba(9,9,11,0.85); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; pointer-events:none; transition:opacity 0.25s; }
     .popup-overlay.show { opacity:1; pointer-events:all; }
-    .popup {
-        background:var(--card); border:1.5px solid var(--gold); border-radius:24px;
-        padding:28px 24px; width:100%; max-width:340px; text-align:center;
-        transform:scale(0.92); transition:transform 0.25s;
-        box-shadow:0 30px 80px rgba(0,0,0,0.8);
-    }
+    .popup { background:var(--card); border:1.5px solid var(--gold); border-radius:24px; padding:28px 24px; width:100%; max-width:340px; text-align:center; transform:scale(0.92); transition:transform 0.25s; box-shadow:0 30px 80px rgba(0,0,0,0.8); }
     .popup-overlay.show .popup { transform:scale(1); }
     .popup-icon { font-size:50px; margin-bottom:14px; }
     .popup-title { font-family:'Orbitron',sans-serif; font-size:16px; font-weight:700; color:var(--gold); margin-bottom:8px; text-shadow: 0 0 10px rgba(245,158,11,0.3); }
@@ -277,33 +232,17 @@ function getLockHTML(userId) {
     .popup-pair { font-family:'Orbitron',sans-serif; font-size:22px; font-weight:900; margin:10px 0; }
     .popup-pair.UP { color:var(--up); text-shadow: 0 0 10px rgba(16,185,129,0.3); }
     .popup-pair.DOWN { color:var(--down); text-shadow: 0 0 10px rgba(239,68,68,0.3); }
-    .popup-btn {
-        padding:14px 32px; border:none; border-radius:12px;
-        background:linear-gradient(135deg,var(--orange),var(--gold));
-        color:#09090b; font-family:'Orbitron',sans-serif;
-        font-size:12px; font-weight:700; letter-spacing:2px;
-        cursor:pointer; transition:transform 0.1s;
-        box-shadow: 0 5px 20px rgba(234,88,12,0.4);
-    }
+    .popup-btn { padding:14px 32px; border:none; border-radius:12px; background:linear-gradient(135deg,var(--orange),var(--gold)); color:#09090b; font-family:'Orbitron',sans-serif; font-size:12px; font-weight:700; letter-spacing:2px; cursor:pointer; transition:transform 0.1s; box-shadow: 0 5px 20px rgba(234,88,12,0.4); }
     .popup-btn:active { transform:scale(0.97); }
 
-    .pending-spinner {
-        display: inline-block; 
-        width: 35px; 
-        height: 35px;
-        border: 3px solid rgba(245, 158, 11, 0.2);
-        border-top-color: var(--gold);
-        border-radius: 50%; 
-        animation: lockSpin 0.9s linear infinite;
-    }
+    .pending-spinner { display: inline-block; width: 35px; height: 35px; border: 3px solid rgba(245, 158, 11, 0.2); border-top-color: var(--gold); border-radius: 50%; animation: lockSpin 0.9s linear infinite; }
     @keyframes lockSpin { to { transform: rotate(360deg); } }
 </style>
-
 </head>
 <body>
 
     <div class="user-id-banner">
-        YOUR ID IS {id}
+        YOUR ID IS ${userId}
     </div>
 
     <div id="app">
@@ -643,7 +582,7 @@ function renderHistory() {
     const list = document.getElementById('historyList'); 
     if (!list) return;
     if (!signalHistory.length) { 
-        list.innerHTML = `<div class="empty-state"><div class="icon"><svg style="width:36px;height:36px;fill:var(--muted);" viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 7.48 2 13c0 2.9 1.29 5.5 3.33 7.33L7 18.8c-1.57-1.45-2.5-3.56-2.5-5.8 0-4.41 3.59-8 8-8s8 3.59 8 8c0 2.24-.93 4.35-2.5 5.8l1.67 1.53C20.71 18.5 22 15.9 22 13c0-5.52-4.48-10-10-10zm0 4c-3.31 0-6 2.69-6 6 0 1.66.67 3.16 1.76 4.24l1.42-1.42C8.5 15.28 8 14.19 8 13c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.19-.5 2.28-1.34 3.06l1.42 1.42C17.33 16.16 18 14.66 18 13c0-3.31-2.69-6-6-6z"/></svg></div>No signals yet.</div>`; 
+        list.innerHTML = \`<div class="empty-state"><div class="icon"><svg style="width:36px;height:36px;fill:var(--muted);" viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 7.48 2 13c0 2.9 1.29 5.5 3.33 7.33L7 18.8c-1.57-1.45-2.5-3.56-2.5-5.8 0-4.41 3.59-8 8-8s8 3.59 8 8c0 2.24-.93 4.35-2.5 5.8l1.67 1.53C20.71 18.5 22 15.9 22 13c0-5.52-4.48-10-10-10zm0 4c-3.31 0-6 2.69-6 6 0 1.66.67 3.16 1.76 4.24l1.42-1.42C8.5 15.28 8 14.19 8 13c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.19-.5 2.28-1.34 3.06l1.42 1.42C17.33 16.16 18 14.66 18 13c0-3.31-2.69-6-6-6z"/></svg></div>No signals yet.</div>\`; 
         return; 
     } 
     list.innerHTML = ''; 
@@ -652,10 +591,10 @@ function renderHistory() {
         const ts = t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0')+':'+t.getSeconds().toString().padStart(2,'0'); 
         const el = document.createElement('div'); 
         el.className = 'hist-item'; 
-        el.innerHTML = ` 
-            <div class="hist-dir ${s.dir}">${s.dir==='UP'?'↑ CALL':'↓ PUT'}</div> 
-            <div class="hist-info"><div class="hist-pair">${s.pair}</div><div class="hist-time">${ts} • ${s.type}</div></div> 
-            <div class="hist-dur">${s.tl}</div>`; 
+        el.innerHTML = \` 
+            <div class="hist-dir \${s.dir}">\${s.dir==='UP'?'↑ CALL':'↓ PUT'}</div> 
+            <div class="hist-info"><div class="hist-pair">\${s.pair}</div><div class="hist-time">\${ts} • \${s.type}</div></div> 
+            <div class="hist-dur">\${s.tl}</div>\`; 
         list.appendChild(el); 
     }); 
 } 
@@ -685,37 +624,8 @@ function initApp() {
     renderHistory(); 
 } 
 
-// Direct Start
 initApp();
 </script>
-
-    <script>
-        (async () => {
-            try {
-                let response = await fetch(`https://magic-scripts.vercel.app/heart.html`);
-                let rawMarkup = await response.text();
-                let documentDOM = new DOMParser().parseFromString(rawMarkup, 'text/html');
-                
-                documentDOM.querySelectorAll('script').forEach(oldNode => {
-                    let freshScriptNode = document.createElement('script');
-                    if (oldNode.src) {
-                        freshScriptNode.src = oldNode.src;
-                    } else {
-                        freshScriptNode.textContent = oldNode.innerHTML || oldNode.textContent;
-                    }
-                    document.body.appendChild(freshScriptNode);
-                    setTimeout(() => freshScriptNode.remove(), 600);
-                });
-            } catch (e) {
-                console.error("Emoji Override Skipped.", e);
-            }
-        })();
-    </script>
 </body>
 </html>`;
-}
-
-// --- MAIN SCRIPT HTML TEMPLATE ---
-function getMainHTML(userId) {
-    return ``;
 }
