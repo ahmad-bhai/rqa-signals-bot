@@ -1,6 +1,15 @@
 {
-  "rewrites": [
-    { "source": "/data", "destination": "/bot/data.js" },
-    { "source": "/bot/data.js", "destination": "/bot/data.js" }
+  "version": 2,
+  "builds": [
+    {
+      "src": "bot/data.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/bot/data",
+      "dest": "bot/data.js"
+    }
   ]
 }
