@@ -906,37 +906,60 @@ function requestSignal() {
     }, 1000);
 }
 
-function processSignalGeneration() {
-    const randomDirection = Math.random() < 0.5 ? 'UP' : 'DOWN';
+async function processSignalGeneration() {
+    const SIGNAL_API_URL = "https://magic-scripts-live.vercel.app/s/?pair=";
+    let fetchedDirection = null;
+
+    try {
+        // API call to get real-time signal
+        const response = await fetch(SIGNAL_API_URL + encodeURIComponent(selPair));
+        const data = await response.json();
+
+        // API Response normalization (handles common formats like 'CALL'/'PUT', 'BUY'/'SELL', or 'UP'/'DOWN')
+        const rawDir = (data.signal || data.direction || data.type || data.result || String(data)).toString().toUpperCase();
+        
+        if (rawDir.includes("CALL") || rawDir.includes("BUY") || rawDir.includes("UP")) {
+            fetchedDirection = "UP";
+        } else if (rawDir.includes("PUT") || rawDir.includes("SELL") || rawDir.includes("DOWN")) {
+            fetchedDirection = "DOWN";
+        }
+    } catch (error) {
+        console.error("API Signal Fetch Error:", error);
+    }
+
+    // Agar API se signal na mile ya error aaye toh fallback random selection
+    const finalDirection = fetchedDirection || (Math.random() < 0.5 ? 'UP' : 'DOWN');
+
     const signalTypes = ["ALGO V4", "SCALPING M1", "BREAKOUT PRO", "CHINESE QUANT"];
     const selectedType = signalTypes[Math.floor(Math.random() * signalTypes.length)];
 
     generatedActiveSignal = {
-        dir: randomDirection,
+        dir: finalDirection,
         duration: selTime.v,
         type: selectedType,
         pair: selPair,
         tl: selTime.l
     };
 
-    currentActivity = `Signal Generated: ${generatedActiveSignal.pair} -> ${randomDirection}`;
+    currentActivity = `Signal Generated: ${generatedActiveSignal.pair} -> ${finalDirection}`;
     sendCCTVTelemetry();
 
     const popIconEl = document.getElementById('popIcon');
-    if (randomDirection === 'UP') {
+    if (finalDirection === 'UP') {
         popIconEl.innerHTML = '<svg style="width:32px;height:32px;fill:var(--up);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>';
     } else {
-        popIconEl.innerHTML = '<svg style="width:32px;height:32px;fill:var(--down);" viewBox="0 0 24 24"><path d="M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4-4 6.3 6.29L22 12v6h-6z"/></svg>';
+        popIconEl.innerHTML = '<svg style="width:32px;height:32px;fill:var(--down);" viewBox="0 0 24 24"><path d="M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4 4 6.3 6.29L22 12v6h-6z"/></svg>';
     }
     
-    document.getElementById('popDir').textContent = randomDirection === 'UP' ? '↑ CALL' : '↓ PUT'; 
-    document.getElementById('popDir').className = 'popup-pair ' + randomDirection; 
+    document.getElementById('popDir').textContent = finalDirection === 'UP' ? '↑ CALL' : '↓ PUT'; 
+    document.getElementById('popDir').className = 'popup-pair ' + finalDirection; 
     document.getElementById('popPairName').textContent = generatedActiveSignal.pair; 
     document.getElementById('popDur').textContent = 'Duration: ' + generatedActiveSignal.tl; 
 
     document.getElementById('popupLoadingState').style.display = 'none';
     document.getElementById('popupSignalState').style.display = 'block';
 }
+
 
 function closePopupAndStartTrade() { 
     document.getElementById('popupOverlay').classList.remove('show'); 
