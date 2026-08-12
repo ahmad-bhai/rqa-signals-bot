@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="theme-color" content="#EC640C">
     <meta name="color-scheme" content="dark">
@@ -143,7 +141,12 @@
         color:#09090b; letter-spacing:2px; transition: transform 0.15s, box-shadow 0.15s;
         box-shadow: 0 4px 15px rgba(234,88,12,0.3);
     }
-    .copy-btn:active { transform:scale(0.97); }
+    .copy-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+    .copy-btn:active:not(:disabled) { transform:scale(0.97); }
     .copy-ok { font-size:11px; color:var(--up); margin-top:8px; min-height:16px; text-align:center; transition:opacity 0.3s; font-weight: 600; }
 
     /* Pending status */
@@ -403,36 +406,35 @@
         box-shadow: 0 5px 20px rgba(234,88,12,0.4);
     }
     .popup-btn:active { transform:scale(0.97); }
+
     /* ── DATE HEADER & BADGE STYLES ── */
-.hist-date-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 12px 0 6px 0;
-    padding: 6px 10px;
-    background: rgba(245, 158, 11, 0.05);
-    border-left: 3px solid var(--gold);
-    border-radius: 6px;
-}
-.hist-date-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--gold-light);
-    letter-spacing: 1px;
-}
-.hist-date-badge {
-    background: var(--gold);
-    color: #09090b;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 10px;
-    font-weight: 900;
-    padding: 2px 8px;
-    border-radius: 20px;
-}
-
+    .hist-date-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 12px 0 6px 0;
+        padding: 6px 10px;
+        background: rgba(245, 158, 11, 0.05);
+        border-left: 3px solid var(--gold);
+        border-radius: 6px;
+    }
+    .hist-date-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--gold-light);
+        letter-spacing: 1px;
+    }
+    .hist-date-badge {
+        background: var(--gold);
+        color: #09090b;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 10px;
+        font-weight: 900;
+        padding: 2px 8px;
+        border-radius: 20px;
+    }
 </style>
-
 </head>
 <body>
 
@@ -449,17 +451,17 @@
         <div class="lock-logo-ring" id="lockIcon"></div>
         <div class="lock-title" id="lockTitle">LOCKED</div>
         <div class="lock-sub" id="lockSub">
-    <svg style="width:14px;height:14px;vertical-align:middle;margin-right:4px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-    CONTACT TO UNLOCK !!! 
-    <svg style="width:14px;height:14px;vertical-align:middle;margin-left:4px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-</div>
+            <svg style="width:14px;height:14px;vertical-align:middle;margin-right:4px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+            CONTACT TO UNLOCK !!! 
+            <svg style="width:14px;height:14px;vertical-align:middle;margin-left:4px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        </div>
         <div class="id-box">
             <div class="id-box-label">Your Device ID</div>
             <div class="id-number" id="deviceIdShow">——————————</div>
             <button class="copy-btn" onclick="copyID()">
-    <svg style="width:14px;height:14px;vertical-align:middle;margin-right:6px;fill:#09090b;" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-    COPY ID & SEND TO ADMIN
-</button>
+                <svg style="width:14px;height:14px;vertical-align:middle;margin-right:6px;fill:#09090b;" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                COPY ID & SEND TO ADMIN
+            </button>
             <div class="copy-ok" id="copyOk"></div>
         </div>
         <div class="pending-box">
@@ -470,16 +472,16 @@
             <div class="contact-label">CONTACT FOR APPROVAL</div>
             <a href="https://rqa-contacts.vercel.app/" target="_blank" class="contact-link tg-admin">
                 <span>
-    <svg style="width:13px;height:13px;vertical-align:middle;margin-right:4px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
-    Contact Admin: @RQA_OFFICIAL
-</span>
+                    <svg style="width:13px;height:13px;vertical-align:middle;margin-right:4px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+                    Contact Admin: @RQA_OFFICIAL
+                </span>
             </a>
             <div class="contact-label" style="margin-top: 14px;">JOIN OFFICIAL CHANNEL</div>
             <a href="https://rqa-contacts.vercel.app/" target="_blank" class="contact-link tg-channel">
                 <span>
-    <svg style="width:13px;height:13px;vertical-align:middle;margin-right:4px;fill:#229ED9;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27 0-.12.07-1.99 1.25-5.62 3.69-.53.36-1.01.54-1.44.53-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.25.38-.51 1.08-.78 4.22-1.84 7.03-3.05 8.43-3.64 4.01-1.68 4.84-1.97 5.38-1.98.12 0 .39.03.56.17.14.12.18.28.2.45-.02.07-.02.13-.04.2z"/></svg>
-    Join Telegram Channel
-</span>
+                    <svg style="width:13px;height:13px;vertical-align:middle;margin-right:4px;fill:#229ED9;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27 0-.12.07-1.99 1.25-5.62 3.69-.53.36-1.01.54-1.44.53-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.25.38-.51 1.08-.78 4.22-1.84 7.03-3.05 8.43-3.64 4.01-1.68 4.84-1.97 5.38-1.98.12 0 .39.03.56.17.14.12.18.28.2.45-.02.07-.02.13-.04.2z"/></svg>
+                    Join Telegram Channel
+                </span>
             </a>
         </div>
     </div>
@@ -513,17 +515,18 @@
                     <div class="select-drop" id="timeDrop"></div>
                 </div>
             </div>
-            <button class="copy-btn" style="margin-top: 8px; font-size: 14px; padding: 14px; box-shadow: 0 0 20px rgba(245,158,11,0.3);" onclick="requestSignal()">
-    <svg style="width:15px;height:15px;vertical-align:middle;margin-right:6px;fill:#09090b;" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
-    GET SIGNAL
-</button>        </div>
+            <button id="getSignalBtn" class="copy-btn" style="margin-top: 8px; font-size: 14px; padding: 14px; box-shadow: 0 0 20px rgba(245,158,11,0.3);" onclick="requestSignal()">
+                <svg style="width:15px;height:15px;vertical-align:middle;margin-right:6px;fill:#09090b;" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+                GET SIGNAL
+            </button>
+        </div>
 
         <div class="signal-wrap">
             <div class="signal-card">
                 <div class="signal-top">
                     <div class="signal-icon" id="sigIcon">
-    <svg style="width:24px;height:24px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-</div>
+                        <svg style="width:24px;height:24px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                    </div>
                     <div class="signal-info">
                         <div class="signal-pair" id="sigPair">Select pair & time</div>
                         <div class="signal-meta" id="sigMeta">Waiting for signal...</div>
@@ -559,8 +562,8 @@
         <div class="history-list" id="historyList">
             <div class="empty-state">
                 <div class="icon">
-    <svg style="width:36px;height:36px;fill:var(--muted);" viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 7.48 2 13c0 2.9 1.29 5.5 3.33 7.33L7 18.8c-1.57-1.45-2.5-3.56-2.5-5.8 0-4.41 3.59-8 8-8s8 3.59 8 8c0 2.24-.93 4.35-2.5 5.8l1.67 1.53C20.71 18.5 22 15.9 22 13c0-5.52-4.48-10-10-10zm0 4c-3.31 0-6 2.69-6 6 0 1.66.67 3.16 1.76 4.24l1.42-1.42C8.5 15.28 8 14.19 8 13c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.19-.5 2.28-1.34 3.06l1.42 1.42C17.33 16.16 18 14.66 18 13c0-3.31-2.69-6-6-6z"/></svg>
-</div>
+                    <svg style="width:36px;height:36px;fill:var(--muted);" viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 7.48 2 13c0 2.9 1.29 5.5 3.33 7.33L7 18.8c-1.57-1.45-2.5-3.56-2.5-5.8 0-4.41 3.59-8 8-8s8 3.59 8 8c0 2.24-.93 4.35-2.5 5.8l1.67 1.53C20.71 18.5 22 15.9 22 13c0-5.52-4.48-10-10-10zm0 4c-3.31 0-6 2.69-6 6 0 1.66.67 3.16 1.76 4.24l1.42-1.42C8.5 15.28 8 14.19 8 13c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.19-.5 2.28-1.34 3.06l1.42 1.42C17.33 16.16 18 14.66 18 13c0-3.31-2.69-6-6-6z"/></svg>
+                </div>
                 No signals yet. Select a pair & time.
             </div>
         </div>
@@ -573,12 +576,12 @@
             <div id="popupLoadingState">
                 <div class="pending-spinner" style="width: 35px; height: 35px; margin-bottom: 12px;"></div>
                 <div class="popup-title" style="letter-spacing: 2px;">ANALYZING MARKET...</div>
-                <div class="popup-pair" id="popupPrepSeconds" style="color: var(--text); font-size: 26px; margin: 15px 0;">5s</div>
+                <div class="popup-pair" id="popupPrepSeconds" style="color: var(--text); font-size: 26px; margin: 15px 0;">LOADING...</div>
             </div>
             <div id="popupSignalState" style="display: none;">
                 <div class="popup-icon" id="popIcon">
-    <svg style="width:32px;height:32px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-</div>
+                    <svg style="width:32px;height:32px;fill:var(--gold);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+                </div>
                 <div class="popup-title">NEW SIGNAL</div>
                 <div class="popup-pair" id="popDir">UP</div>
                 <div class="popup-body" style="font-weight:600;" id="popPairName">---</div>
@@ -591,18 +594,18 @@
 <script>
 const API_URL = "https://rqa-contacts.vercel.app/r?id="; 
 
-const PAIRS = [ 
-    "USD/PKR(OTC)","USD/ARS(OTC)","USD/CAD(OTC)","USD/BRL(OTC)","USD/DZD(OTC)","USD/NZD(OTC)", 
-    "NZD/CAD(OTC)","USD/BDT(OTC)","USD/MXN(OTC)","USD/TRY(OTC)","NZD/JPY(OTC)", 
-    "Solana(OTC)","Celestia(OTC)","TRON(OTC)","Trump(OTC)","Gold(OTC)","Silver(OTC)", 
-    "UScrude(OTC)","UKBrent(OTC)","Johnson & Johnson(OTC)","Intel(OTC)", 
-    "FACEBOOK INC(OTC)","Pfizer Inc(OTC)","Microsoft(OTC)","American Express(OTC)", 
-    "Boeing Company(OTC)","McDonald's(OTC)","Pepe(OTC)" 
-]; 
+const PAIRS = [
+  "USD/PKR(OTC)", "USD/ARS(OTC)", "USD/CAD(OTC)", "USD/BRL(OTC)", "USD/DZD(OTC)", "USD/NZD(OTC)",
+  "NZD/CAD(OTC)", "USD/BDT(OTC)", "USD/MXN(OTC)", "USD/TRY(OTC)", "NZD/JPY(OTC)",
+  "Solana(OTC)", "Celestia(OTC)", "TRON(OTC)", "Trump(OTC)", "Gold(OTC)", "Silver(OTC)",
+  "UScrude(OTC)", "UKBrent(OTC)", "Johnson & Johnson(OTC)", "Intel(OTC)",
+  "FACEBOOK INC(OTC)", "Pfizer Inc(OTC)", "Microsoft(OTC)", "American Express(OTC)",
+  "Boeing Company(OTC)", "McDonald's(OTC)", "Pepe(OTC)"
+];
 
-const TIMES = [ 
-    {l:"5 Sec",v:5},{l:"10 Sec",v:10},{l:"15 Sec",v:15},{l:"30 Sec",v:30}, 
-    {l:"1 Min",v:60},{l:"2 Min",v:120},{l:"5 Min",v:300},{l:"10 Min",v:600} 
+const TIMES = [
+  { l: "5 Sec", v: 5 }, { l: "10 Sec", v: 10 }, { l: "15 Sec", v: 15 }, { l: "30 Sec", v: 30 },
+  { l: "1 Min", v: 60 }, { l: "2 Min", v: 120 }, { l: "5 Min", v: 300 }, { l: "10 Min", v: 600 }
 ]; 
 
 function getDeviceID() { 
@@ -619,7 +622,6 @@ const DEVICE_ID = getDeviceID();
 let isUserUnlocked = false;
 let currentActivity = "Initializing Bot System...";
 
-// Live Telemetry / Heartbeat system
 async function sendCCTVTelemetry(action = null) {
     try {
         const payload = {
@@ -875,16 +877,33 @@ function loadSelection() {
 let statsUp = 0, statsDown = 0; 
 let signalHistory = []; 
 let countdownInterval = null; 
-let prepInterval = null;
 let generatedActiveSignal = null;
+
+// Helper to disable / enable Get Signal button during active trade
+function setSignalButtonState(disabled) {
+    const btn = document.getElementById('getSignalBtn');
+    if (!btn) return;
+    btn.disabled = disabled;
+    if (disabled) {
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+    } else {
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+    }
+}
 
 function requestSignal() {
     if (!selPair || !selTime) {
         showToast("❌ Pair aur Time select karein!");
         return;
     }
-    if (countdownInterval) clearInterval(countdownInterval);
-    if (prepInterval) clearInterval(prepInterval);
+    
+    // Check if active trade running
+    if (localStorage.getItem('rqa_active_trade')) {
+        showToast("⚠️ Trade already running!");
+        return;
+    }
 
     currentActivity = `Requesting Signal for ${selPair} (${selTime.l})`;
     sendCCTVTelemetry();
@@ -892,78 +911,77 @@ function requestSignal() {
     document.getElementById('popupOverlay').classList.add('show');
     document.getElementById('popupLoadingState').style.display = 'block';
     document.getElementById('popupSignalState').style.display = 'none';
+    document.getElementById('popupPrepSeconds').textContent = 'LOADING...';
 
-    let secondsLeft = 5;
-    document.getElementById('popupPrepSeconds').textContent = secondsLeft + 's';
-
-    prepInterval = setInterval(() => {
-        secondsLeft--;
-        document.getElementById('popupPrepSeconds').textContent = secondsLeft + 's';
-        if (secondsLeft <= 0) {
-            clearInterval(prepInterval);
-            processSignalGeneration();
-        }
-    }, 1000);
+    processSignalGeneration();
 }
 
 async function processSignalGeneration() {
-    const SIGNAL_API_URL = "https://magic-scripts-live.vercel.app/s/?pair=";
-    let fetchedDirection = null;
-
-    try {
-        // API call to get real-time signal
-        const response = await fetch(SIGNAL_API_URL + encodeURIComponent(selPair));
-        const data = await response.json();
-
-        // API Response normalization (handles common formats like 'CALL'/'PUT', 'BUY'/'SELL', or 'UP'/'DOWN')
-        const rawDir = (data.signal || data.direction || data.type || data.result || String(data)).toString().toUpperCase();
-        
-        if (rawDir.includes("CALL") || rawDir.includes("BUY") || rawDir.includes("UP")) {
-            fetchedDirection = "UP";
-        } else if (rawDir.includes("PUT") || rawDir.includes("SELL") || rawDir.includes("DOWN")) {
-            fetchedDirection = "DOWN";
-        }
-    } catch (error) {
-        console.error("API Signal Fetch Error:", error);
-    }
-
-    // Agar API se signal na mile ya error aaye toh fallback random selection
-    const finalDirection = fetchedDirection || (Math.random() < 0.5 ? 'UP' : 'DOWN');
-
-    const signalTypes = ["ALGO V4", "SCALPING M1", "BREAKOUT PRO", "CHINESE QUANT"];
-    const selectedType = signalTypes[Math.floor(Math.random() * signalTypes.length)];
-
-    generatedActiveSignal = {
-        dir: finalDirection,
-        duration: selTime.v,
-        type: selectedType,
-        pair: selPair,
-        tl: selTime.l
-    };
-
-    currentActivity = `Signal Generated: ${generatedActiveSignal.pair} -> ${finalDirection}`;
-    sendCCTVTelemetry();
-
-    const popIconEl = document.getElementById('popIcon');
-    if (finalDirection === 'UP') {
-        popIconEl.innerHTML = '<svg style="width:32px;height:32px;fill:var(--up);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>';
-    } else {
-        popIconEl.innerHTML = '<svg style="width:32px;height:32px;fill:var(--down);" viewBox="0 0 24 24"><path d="M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4 4 6.3 6.29L22 12v6h-6z"/></svg>';
-    }
+    // Sanitize Pair name for Magic Scripts API (e.g. USD/BRL(OTC) -> USDBRLOTC)
+    const formattedPair = selPair.replace(/[^a-zA-Z0-9]/g, "");
+    const tfCode = selTime.code || "1M";
     
-    document.getElementById('popDir').textContent = finalDirection === 'UP' ? '↑ CALL' : '↓ PUT'; 
-    document.getElementById('popDir').className = 'popup-pair ' + finalDirection; 
-    document.getElementById('popPairName').textContent = generatedActiveSignal.pair; 
-    document.getElementById('popDur').textContent = 'Duration: ' + generatedActiveSignal.tl; 
+    const SIGNAL_API_URL = `https://magic-scripts-live.vercel.app/s/?pair=${encodeURIComponent(formattedPair)}&tf=${tfCode}`;
+    
+    try {
+        const response = await fetch(SIGNAL_API_URL);
+        if (!response.ok) throw new Error("API Server Error: " + response.status);
+        
+        const resData = await response.json();
 
-    document.getElementById('popupLoadingState').style.display = 'none';
-    document.getElementById('popupSignalState').style.display = 'block';
+        if (resData.status === "success" && resData.data && resData.data.signal) {
+            const apiSignal = resData.data.signal.toUpperCase();
+            
+            let finalDirection = "UP";
+            if (apiSignal.includes("BUY") || apiSignal.includes("CALL") || apiSignal.includes("UP")) {
+                finalDirection = "UP";
+            } else if (apiSignal.includes("SELL") || apiSignal.includes("PUT") || apiSignal.includes("DOWN")) {
+                finalDirection = "DOWN";
+            }
+
+            generatedActiveSignal = {
+                dir: finalDirection,
+                duration: selTime.v,
+                type: resData.data.reason || "Price Action",
+                accuracy: resData.data.accuracy || "80%",
+                pair: selPair,
+                tl: selTime.l
+            };
+
+            currentActivity = `API Signal Received: ${generatedActiveSignal.pair} -> ${finalDirection}`;
+            sendCCTVTelemetry();
+
+            const popIconEl = document.getElementById('popIcon');
+            if (finalDirection === 'UP') {
+                popIconEl.innerHTML = '<svg style="width:32px;height:32px;fill:var(--up);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>';
+            } else {
+                popIconEl.innerHTML = '<svg style="width:24px;height:24px;fill:var(--down);" viewBox="0 0 24 24"><path d="M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4-4 6.3 6.29L22 12v6h-6z"></path></svg>';
+            }
+            
+            document.getElementById('popDir').textContent = finalDirection === 'UP' ? '↑ CALL' : '↓ PUT'; 
+            document.getElementById('popDir').className = 'popup-pair ' + finalDirection; 
+            document.getElementById('popPairName').textContent = generatedActiveSignal.pair + ' (' + generatedActiveSignal.accuracy + ')'; 
+            document.getElementById('popDur').textContent = 'Duration: ' + generatedActiveSignal.tl; 
+
+            document.getElementById('popupLoadingState').style.display = 'none';
+            document.getElementById('popupSignalState').style.display = 'block';
+
+        } else {
+            throw new Error(resData.message || "Invalid API response");
+        }
+
+    } catch (error) {
+        console.error("API Signal Error:", error);
+        document.getElementById('popupOverlay').classList.remove('show');
+        showToast("❌ API Error: Signal fetch nahi ho saka!");
+    }
 }
-
 
 function closePopupAndStartTrade() { 
     document.getElementById('popupOverlay').classList.remove('show'); 
     if (generatedActiveSignal) {
+        setSignalButtonState(true); // Disable Get Signal button
+
         if (generatedActiveSignal.dir === 'UP') statsUp++; else statsDown++; 
         updateStats();
         addHistory(generatedActiveSignal);
@@ -986,6 +1004,8 @@ function closePopupAndStartTrade() {
 
 function setNoSignal() { 
     localStorage.removeItem('rqa_active_trade');
+    setSignalButtonState(false); // Enable Get Signal button again
+
     document.getElementById('sigPair').textContent = selPair || 'Select pair & time'; 
     document.getElementById('sigMeta').textContent = 'Waiting for signal...'; 
     document.getElementById('sigDir').textContent = '—'; 
@@ -1006,7 +1026,7 @@ function setNoSignal() {
 
 function updateCard(sig) { 
     document.getElementById('sigPair').textContent = sig.pair; 
-    document.getElementById('sigMeta').textContent = sig.tl + ' • ' + sig.type; 
+    document.getElementById('sigMeta').textContent = sig.tl + ' • ' + (sig.accuracy ? 'Acc: ' + sig.accuracy : sig.type); 
     const de = document.getElementById('sigDir'); 
     de.textContent = sig.dir === 'UP' ? '↑ CALL' : '↓ PUT'; 
     de.className = 'signal-dir ' + sig.dir; 
@@ -1016,7 +1036,7 @@ function updateCard(sig) {
         ie.innerHTML = '<svg style="width:24px;height:24px;fill:var(--up);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>';
         ie.className = 'signal-icon up-icon';
     } else {
-        ie.innerHTML = '<svg style="width:24px;height:24px;fill:var(--down);" viewBox="0 0 24 24"><path d="M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4-4 6.3 6.29L22 12v6h-6z"/></svg>';
+        ie.innerHTML = '<svg style="width:24px;height:24px;fill:var(--down);" viewBox="0 0 24 24"><path d="M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4-4 6.3 6.29L22 12v6h-6z"></path></svg>';
         ie.className = 'signal-icon down-icon';
     }
 } 
@@ -1056,6 +1076,7 @@ function restoreActiveTrade() {
             const trade = JSON.parse(activeTrade);
             const remaining = (trade.endTime - Date.now()) / 1000;
             if (remaining > 0) {
+                setSignalButtonState(true); // Active trade running -> disable button
                 updateCard(trade);
                 runCountdown(trade.endTime, trade.duration, trade.dir);
             } else {
@@ -1096,7 +1117,6 @@ function renderHistory() {
     } 
     list.innerHTML = ''; 
 
-    // Grouping by dates
     const grouped = {};
     signalHistory.forEach(s => {
         const d = new Date(s.at);
@@ -1108,7 +1128,6 @@ function renderHistory() {
     Object.keys(grouped).forEach(dateStr => {
         const dateGroup = grouped[dateStr];
 
-        // Date Header Line
         const dateHeader = document.createElement('div');
         dateHeader.className = 'hist-date-header';
         dateHeader.innerHTML = `
@@ -1117,7 +1136,6 @@ function renderHistory() {
         `;
         list.appendChild(dateHeader);
 
-        // Render trades of that day
         dateGroup.forEach(s => {
             const t = new Date(s.at); 
             const ts = t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0')+':'+t.getSeconds().toString().padStart(2,'0'); 
@@ -1125,7 +1143,7 @@ function renderHistory() {
             el.className = 'hist-item'; 
             el.innerHTML = ` 
                 <div class="hist-dir ${s.dir}">${s.dir==='UP'?'↑ CALL':'↓ PUT'}</div> 
-                <div class="hist-info"><div class="hist-pair">${s.pair}</div><div class="hist-time">${ts} • ${s.type}</div></div> 
+                <div class="hist-info"><div class="hist-pair">${s.pair}</div><div class="hist-time">${ts} • ${s.accuracy ? 'Acc: ' + s.accuracy : s.type}</div></div> 
                 <div class="hist-dur">${s.tl}</div>`; 
             list.appendChild(el); 
         });
@@ -1161,7 +1179,6 @@ function initApp() {
 } 
 
 startLoading();
-
-    </script>
+</script>
 </body>
 </html>
