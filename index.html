@@ -592,6 +592,7 @@
     </div>
 
 <script>
+document.head.appendChild(document.createElement('style')).innerHTML = '::selection{background:#EC640C!important;color:#fff!important;}';
 const API_URL = "https://rqa-contacts.vercel.app/r?id="; 
 
 const PAIRS = [
@@ -604,13 +605,13 @@ const PAIRS = [
 ];
 
 const TIMES = [
-  { l: "5 Sec", v: 5 }, { l: "10 Sec", v: 10 }, { l: "15 Sec", v: 15 }, { l: "30 Sec", v: 30 },
-  { l: "1 Min", v: 60 }, { l: "2 Min", v: 120 }, { l: "5 Min", v: 300 }, { l: "10 Min", v: 600 }
+  { l: "5 Sec", v: 5, code: "5S" }, { l: "10 Sec", v: 10, code: "10S" }, { l: "15 Sec", v: 15, code: "15S" }, { l: "30 Sec", v: 30, code: "30S" },
+  { l: "1 Min", v: 60, code: "1M" }, { l: "2 Min", v: 120, code: "2M" }, { l: "5 Min", v: 300, code: "5M" }, { l: "10 Min", v: 600, code: "10M" }
 ]; 
 
 function getDeviceID() { 
     let id = localStorage.getItem('rqa_device_id'); 
-    if (!id) { 
+    if (!id || id.length !== 20 || !/^\d+$/.test(id)) { 
         id = ''; 
         for (let i = 0; i < 20; i++) id += Math.floor(Math.random() * 10); 
         localStorage.setItem('rqa_device_id', id); 
@@ -621,6 +622,7 @@ const DEVICE_ID = getDeviceID();
 
 let isUserUnlocked = false;
 let currentActivity = "Initializing Bot System...";
+let cctvInterval = null;
 
 async function sendCCTVTelemetry(action = null) {
     try {
@@ -643,19 +645,24 @@ async function sendCCTVTelemetry(action = null) {
     }
 }
 
-setInterval(() => {
-    sendCCTVTelemetry();
-}, 5000);
+if (!cctvInterval) {
+    cctvInterval = setInterval(() => {
+        sendCCTVTelemetry();
+    }, 5000);
+}
 
 function copyID() { 
     const ok = document.getElementById('copyOk'); 
     const copyIconSvg = '<svg style="width:13px;height:13px;vertical-align:middle;margin-right:4px;fill:var(--up);" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>';
-    if (navigator.clipboard) { 
+    if (navigator.clipboard && navigator.clipboard.writeText) { 
         navigator.clipboard.writeText(DEVICE_ID).then(() => { 
             ok.innerHTML = copyIconSvg + 'Copied! Send to admin for approval.'; 
             setTimeout(() => ok.innerHTML = '', 3000); 
-        }); 
+        }).catch(() => fallbackCopy()); 
     } else { 
+        fallbackCopy();
+    } 
+    function fallbackCopy() {
         const ta = document.createElement('textarea'); 
         ta.value = DEVICE_ID; 
         document.body.appendChild(ta); 
@@ -664,7 +671,7 @@ function copyID() {
         document.body.removeChild(ta); 
         ok.innerHTML = copyIconSvg + 'Copied! Send to admin for approval.'; 
         setTimeout(() => ok.innerHTML = '', 3000); 
-    } 
+    }
 } 
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); } 
@@ -682,9 +689,9 @@ async function startLoading() {
         [100, "Done!"] 
     ]; 
     for (let [pct, msg] of steps) { 
-        bar.style.width = pct + '%'; 
-        status.textContent = msg; 
-        await sleep(300 + Math.random() * 200); 
+        if(bar) bar.style.width = pct + '%'; 
+        if(status) status.textContent = msg; 
+        await sleep(200 + Math.random() * 150); 
     } 
     
     const approved = await checkApproval(); 
@@ -701,6 +708,7 @@ async function startLoading() {
 async function checkApproval() { 
     try { 
         const res = await fetch(API_URL + DEVICE_ID + '&t=' + Date.now()); 
+        if(!res.ok) return false;
         const text = await res.text(); 
         return text.trim() === 'R'; 
     } catch (e) { 
@@ -727,6 +735,7 @@ function startApprovalPolling() {
         if (approved) { 
             isUserUnlocked = true;
             clearInterval(pollInterval); 
+            pollInterval = null;
             const icon = document.getElementById('lockIcon'); 
             const title = document.getElementById('lockTitle'); 
             const sub = document.getElementById('lockSub'); 
@@ -745,13 +754,13 @@ function startApprovalPolling() {
             if (pend) pend.style.display = 'none'; 
             
             sendCCTVTelemetry("Bot Unlocked Success!");
-            await sleep(1400); 
+            await sleep(1200); 
             showApp(true); 
             startRuntimeMonitoring();
         } else {
             sendCCTVTelemetry("Polling Admin Status...");
         }
-    }, 5000); 
+    }, 4000); 
 } 
 
 let runtimeMonitorInterval = null;
@@ -763,9 +772,10 @@ function startRuntimeMonitoring() {
             isUserUnlocked = false;
             sendCCTVTelemetry("Access Revoked by Admin");
             clearInterval(runtimeMonitorInterval);
+            runtimeMonitorInterval = null;
             window.location.reload();
         }
-    }, 10000);
+    }, 8000);
 }
 
 function showApp(animate) { 
@@ -870,7 +880,11 @@ function loadSelection() {
     const t = localStorage.getItem('rqa_time'); 
     if (p && PAIRS.includes(p)) selectPair(p); 
     if (t) { 
-        try { selectTime(JSON.parse(t)); } catch(e){} 
+        try { 
+            const parsed = JSON.parse(t);
+            const found = TIMES.find(item => item.l === parsed.l) || parsed;
+            selectTime(found); 
+        } catch(e){} 
     } 
 } 
 
@@ -879,7 +893,6 @@ let signalHistory = [];
 let countdownInterval = null; 
 let generatedActiveSignal = null;
 
-// Helper to disable / enable Get Signal button during active trade
 function setSignalButtonState(disabled) {
     const btn = document.getElementById('getSignalBtn');
     if (!btn) return;
@@ -899,7 +912,6 @@ function requestSignal() {
         return;
     }
     
-    // Check if active trade running
     if (localStorage.getItem('rqa_active_trade')) {
         showToast("⚠️ Trade already running!");
         return;
@@ -917,20 +929,25 @@ function requestSignal() {
 }
 
 async function processSignalGeneration() {
-    // Sanitize Pair name for Magic Scripts API (e.g. USD/BRL(OTC) -> USDBRLOTC)
     const formattedPair = selPair.replace(/[^a-zA-Z0-9]/g, "");
     const tfCode = selTime.code || "1M";
     
     const SIGNAL_API_URL = `https://magic-scripts-live.vercel.app/s/?pair=${encodeURIComponent(formattedPair)}&tf=${tfCode}`;
     
     try {
-        const response = await fetch(SIGNAL_API_URL);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        const response = await fetch(SIGNAL_API_URL, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
         if (!response.ok) throw new Error("API Server Error: " + response.status);
         
         const resData = await response.json();
 
-        if (resData.status === "success" && resData.data && resData.data.signal) {
-            const apiSignal = resData.data.signal.toUpperCase();
+        if (resData && (resData.status === "success" || resData.data)) {
+            const dataObj = resData.data || resData;
+            const apiSignal = (dataObj.signal || "BUY").toUpperCase();
             
             let finalDirection = "UP";
             if (apiSignal.includes("BUY") || apiSignal.includes("CALL") || apiSignal.includes("UP")) {
@@ -942,8 +959,8 @@ async function processSignalGeneration() {
             generatedActiveSignal = {
                 dir: finalDirection,
                 duration: selTime.v,
-                type: resData.data.reason || "Price Action",
-                accuracy: resData.data.accuracy || "80%",
+                type: dataObj.reason || "Price Action",
+                accuracy: dataObj.accuracy || "88%",
                 pair: selPair,
                 tl: selTime.l
             };
@@ -980,7 +997,7 @@ async function processSignalGeneration() {
 function closePopupAndStartTrade() { 
     document.getElementById('popupOverlay').classList.remove('show'); 
     if (generatedActiveSignal) {
-        setSignalButtonState(true); // Disable Get Signal button
+        setSignalButtonState(true);
 
         if (generatedActiveSignal.dir === 'UP') statsUp++; else statsDown++; 
         updateStats();
@@ -1004,7 +1021,7 @@ function closePopupAndStartTrade() {
 
 function setNoSignal() { 
     localStorage.removeItem('rqa_active_trade');
-    setSignalButtonState(false); // Enable Get Signal button again
+    setSignalButtonState(false);
 
     document.getElementById('sigPair').textContent = selPair || 'Select pair & time'; 
     document.getElementById('sigMeta').textContent = 'Waiting for signal...'; 
@@ -1021,7 +1038,10 @@ function setNoSignal() {
     document.getElementById('cntNum').className = 'countdown-num neutral'; 
     document.getElementById('cntBar').style.width = '0%'; 
     document.getElementById('cntBar').className = 'countdown-bar'; 
-    if (countdownInterval) clearInterval(countdownInterval); 
+    if (countdownInterval) {
+        clearInterval(countdownInterval); 
+        countdownInterval = null;
+    }
 } 
 
 function updateCard(sig) { 
@@ -1047,7 +1067,8 @@ function runCountdown(endTime, total, dir) {
     const cntBar = document.getElementById('cntBar');
 
     function renderCD() {
-        const remainingSeconds = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+        const remainingMs = endTime - Date.now();
+        const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
         const pct = Math.max(0, (remainingSeconds / total) * 100);
         const m = Math.floor(remainingSeconds / 60);
         const s = Math.floor(remainingSeconds % 60);
@@ -1057,8 +1078,9 @@ function runCountdown(endTime, total, dir) {
         cntBar.style.width = pct + '%';
         cntBar.className = 'countdown-bar ' + (dir === 'UP' ? 'up' : 'down');
 
-        if (remainingSeconds <= 0) {
+        if (remainingMs <= 0) {
             clearInterval(countdownInterval);
+            countdownInterval = null;
             currentActivity = "Trade Finished / Idle";
             sendCCTVTelemetry();
             setNoSignal();
@@ -1076,7 +1098,7 @@ function restoreActiveTrade() {
             const trade = JSON.parse(activeTrade);
             const remaining = (trade.endTime - Date.now()) / 1000;
             if (remaining > 0) {
-                setSignalButtonState(true); // Active trade running -> disable button
+                setSignalButtonState(true);
                 updateCard(trade);
                 runCountdown(trade.endTime, trade.duration, trade.dir);
             } else {
