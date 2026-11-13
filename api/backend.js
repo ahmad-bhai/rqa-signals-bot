@@ -2,7 +2,6 @@
 const crypto = require("crypto");
 
 const SIGNAL_BASE = "https://magic-scripts-live.vercel.app/s";
-const SIGNAL_KEY = process.env.SIGNAL_KEY || "Ahmad Bhai0";
 const ADMIN_KEY = process.env.ADMIN_KEY || "";
 const APPROVED_ENV = (process.env.APPROVED_IDS || "").split(",").map(s => s.trim()).filter(Boolean);
 const FIREBASE_BASE_URL = "https://rqa-bot-admin-default-rtdb.firebaseio.com";
@@ -21,7 +20,21 @@ async function rateOk(id) {
   return true;
 }
 
-/* ---------- Firebase Helper ---------- */
+/* ---------- Firebase Helpers ---------- */
+async function getSignalKey() {
+  try {
+    const res = await fetch(`${FIREBASE_BASE_URL}/settings/signalKey.json`);
+    if (res.ok) {
+      const val = await res.json();
+      if (val) return String(val).trim();
+    }
+  } catch (e) {
+    console.error("Signal key fetch error:", e);
+  }
+  // Fallback environment variable agar Firebase fetch fail ho jaye
+  return process.env.SIGNAL_KEY || "Ahmad Bhai0";
+}
+
 async function getFirebaseUser(id) {
   try {
     const res = await fetch(`${FIREBASE_BASE_URL}/users.json`);
@@ -152,10 +165,13 @@ module.exports = async (req, res) => {
       if (!TF_OK.includes(tf)) return res.status(400).json({ status: "error", message: "Invalid timeframe" });
       if (!(await rateOk(id))) return res.status(429).json({ status: "error", message: "Too many requests. Please wait a few seconds." });
 
+      // Firebase se dynamic signal key fetch ho rahi hai
+      const activeSignalKey = await getSignalKey();
+
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), 8000);
       try {
-        const url = `${SIGNAL_BASE}?pair=${encodeURIComponent(pair)}&tf=${encodeURIComponent(tf)}&key=${encodeURIComponent(SIGNAL_KEY)}`;
+        const url = `${SIGNAL_BASE}?pair=${encodeURIComponent(pair)}&tf=${encodeURIComponent(tf)}&key=${encodeURIComponent(activeSignalKey)}`;
         const r = await fetch(url, { signal: ctrl.signal });
         const j = parse(await r.text());
         if (!j) return res.status(502).json({ status: "error", message: "Signal service returned an invalid response" });
