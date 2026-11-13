@@ -5,34 +5,15 @@ const SIGNAL_BASE = "https://magic-scripts-live.vercel.app/s";
 const SIGNAL_KEY = process.env.SIGNAL_KEY || "Ahmad Bhai00";
 const ADMIN_KEY = process.env.ADMIN_KEY || "";
 const APPROVED_ENV = (process.env.APPROVED_IDS || "").split(",").map(s => s.trim()).filter(Boolean);
-const UPSTREAM = process.env.APPROVAL_UPSTREAM || "";
-const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || "";
-const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "";
+const FIREBASE_BASE_URL = "https://rqa-bot-admin-default-rtdb.firebaseio.com";
 
 const ID_RE = /^\d{20}$/;
 const PAIR_RE = /^[a-z0-9_]{3,30}$/;
 const TF_OK = ["5S", "10S", "15S", "30S", "1M", "2M", "3M", "5M", "10M", "15M"];
 const SIGNAL_GAP_SEC = 3;
 
-/* ---------- tiny Redis REST helper (optional) ---------- */
-async function kv(cmd, pipeline = false) {
-  if (!KV_URL) return null;
-  try {
-    const r = await fetch(pipeline ? KV_URL + "/pipeline" : KV_URL, {
-      method: "POST",
-      headers: { Authorization: "Bearer " + KV_TOKEN },
-      body: JSON.stringify(cmd),
-    });
-    const j = await r.json();
-    return pipeline ? j : j.result;
-  } catch {
-    return null;
-  }
-}
-
 const memRate = new Map();
 async function rateOk(id) {
-  if (KV_URL) return (await kv(["SET", "rl:" + id, "1", "NX", "EX", SIGNAL_GAP_SEC])) === "OK";
   const now = Date.now(), last = memRate.get(id) || 0;
   if (now - last < SIGNAL_GAP_SEC * 1000) return false;
   memRate.set(id, now);
@@ -40,14 +21,30 @@ async function rateOk(id) {
   return true;
 }
 
+/* ---------- Firebase Helper ---------- */
+async function getFirebaseUser(id) {
+  try {
+    const res = await fetch(`${FIREBASE_BASE_URL}/users.json`);
+    if (!res.ok) return null;
+    const allUsers = await res.json();
+    if (!allUsers) return null;
+    
+    for (let key in allUsers) {
+      if (allUsers[key] && String(allUsers[key].id).trim() === String(id).trim()) {
+        return { key, data: allUsers[key] };
+      }
+    }
+  } catch (e) {
+    console.error("Firebase fetch error:", e);
+  }
+  return null;
+}
+
 async function isApproved(id) {
   if (APPROVED_ENV.includes(id)) return true;
-  if (KV_URL && (await kv(["GET", "approved:" + id]))) return true;
-  if (UPSTREAM) {
-    try {
-      const r = await fetch(UPSTREAM + id + "&t=" + Date.now());
-      return r.ok && (await r.text()).trim() === "R";
-    } catch {}
+  const user = await getFirebaseUser(id);
+  if (user && user.data && user.data.status === "active") {
+    return true;
   }
   return false;
 }
@@ -60,13 +57,6 @@ function cleanTelemetry(raw) {
   return { status: s(o.status), activity: s(o.activity), pair: s(o.pair), time: s(o.time), lastSignal: s(o.lastSignal), at: Date.now() };
 }
 
-function adminOk(req) {
-  const given = String(req.headers["x-admin-key"] || req.query.admin || "");
-  if (!ADMIN_KEY || !given) return false;
-  const a = Buffer.from(given), b = Buffer.from(ADMIN_KEY);
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
-}
-
 const parse = v => { try { return JSON.parse(v); } catch { return null; } };
 
 function sendText(res, code, text) {
@@ -74,56 +64,87 @@ function sendText(res, code, text) {
   return res.status(code).send(text);
 }
 
-/* ---------- handler ---------- */
+/* ---------- Handler ---------- */
 module.exports = async (req, res) => {
   try {
     res.setHeader("Cache-Control", "no-store");
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Headers", "x-admin-key");
-    if (req.method === "OPTIONS") return res.status(204).end();
-    if (req.method !== "GET") return res.status(405).json({ status: "error", message: "Method not allowed" });
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-admin-key");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    
+    if (req.method === 'OPTIONS') return res.status(204).end();
+    if (req.method !== 'GET') return res.status(405).json({ status: "error", message: "Method not allowed" });
 
     const q = req.query || {};
     const action = String(q.action || "check");
-    const id = String(q.id || "");
+    const id = String(q.id || "").trim();
 
-    /* admin */
-    if (["list", "approve", "revoke"].includes(action)) {
-      if (!adminOk(req)) return res.status(401).json({ status: "error", message: "Unauthorized" });
-      if (!KV_URL) return res.status(501).json({ status: "error", message: "Storage not configured. Add Vercel KV/Upstash or use APPROVED_IDS." });
-
-      if (action === "list") {
-        const ids = ((await kv(["SMEMBERS", "devices"])) || []).slice(0, 200);
-        const out = ids.length ? await kv(ids.flatMap(i => [["GET", "seen:" + i], ["GET", "approved:" + i]]), true) : [];
-        const rows = ids.map((i, n) => ({
-          id: i,
-          approved: APPROVED_ENV.includes(i) || !!(out[n * 2 + 1] && out[n * 2 + 1].result),
-          seen: parse(out[n * 2] && out[n * 2].result),
-        })).sort((a, b) => ((b.seen && b.seen.at) || 0) - ((a.seen && a.seen.at) || 0));
-        return res.json({ status: "success", count: rows.length, devices: rows });
-      }
-      if (!ID_RE.test(id)) return res.status(400).json({ status: "error", message: "Invalid device id" });
-      if (action === "approve") {
-        await kv(["SET", "approved:" + id, "1"]);
-        await kv(["SADD", "devices", id]);
-      } else {
-        await kv(["DEL", "approved:" + id]);
-      }
-      return res.json({ status: "success", id, approved: action === "approve" });
+    if (!ID_RE.test(id)) {
+      return sendText(res, 400, "N");
     }
 
-    /* device */
-    if (!ID_RE.test(id)) return sendText(res, 400, "N");
+    // Client & Device Extraction for Logs/Telemetry
+    const rawUserAgent = req.headers['user-agent'] || '';
+    const clientIp = (req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '').split(',')[0].trim();
 
-    if (q.telemetry && KV_URL) {
-      const t = cleanTelemetry(String(q.telemetry));
-      if (t) {
-        await kv([["SADD", "devices", id], ["SET", "seen:" + id, JSON.stringify(t), "EX", 604800]], true);
+    let os = "Unknown OS";
+    if (/windows nt/i.test(rawUserAgent)) os = "Windows PC";
+    else if (/macintosh|mac os x/i.test(rawUserAgent)) os = "macOS";
+    else if (/android/i.test(rawUserAgent)) os = "Android Mobile";
+    else if (/iphone|ipad|ipod/i.test(rawUserAgent)) os = "iOS Device";
+    else if (/linux/i.test(rawUserAgent)) os = "Linux";
+
+    let browser = "Unknown Browser";
+    if (/edg/i.test(rawUserAgent)) browser = "Microsoft Edge";
+    else if (/chrome|crios/i.test(rawUserAgent) && !/edg/i.test(rawUserAgent)) browser = "Google Chrome";
+    else if (/safari/i.test(rawUserAgent) && !/chrome|crios/i.test(rawUserAgent)) browser = "Apple Safari";
+    else if (/firefox|fxios/i.test(rawUserAgent)) browser = "Mozilla Firefox";
+
+    // Update Firebase User Logs / Telemetry in background
+    const firebaseUser = await getFirebaseUser(id);
+    if (firebaseUser) {
+      const now = new Date();
+      const currentLog = {
+        timestamp: now.toISOString(),
+        date: now.toLocaleDateString('en-US', { timeZone: 'Asia/Karachi' }),
+        time: now.toLocaleTimeString('en-US', { timeZone: 'Asia/Karachi' }),
+        ip: clientIp,
+        device: `${os} | ${browser}`,
+        status: firebaseUser.data.status === "active" ? "Unlocked (Active)" : "Locked (Inactive)"
+      };
+
+      let existingLogs = [];
+      if (firebaseUser.data.logs && typeof firebaseUser.data.logs === 'object') {
+        existingLogs = Array.isArray(firebaseUser.data.logs) ? firebaseUser.data.logs : Object.values(firebaseUser.data.logs);
       }
+      existingLogs.unshift(currentLog);
+      const updatedLogs = existingLogs.slice(0, 5);
+
+      const updateData = {
+        lastSeen: now.toISOString(),
+        lastIp: clientIp,
+        lastDevice: `${os} | ${browser}`,
+        userAgent: rawUserAgent,
+        logs: updatedLogs
+      };
+
+      if (q.telemetry) {
+        const t = cleanTelemetry(String(q.telemetry));
+        if (t) updateData.telemetry = t;
+      }
+
+      fetch(`${FIREBASE_BASE_URL}/users/${firebaseUser.key}.json`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData)
+      }).catch(() => {});
     }
 
+    // Action: Signal Request
     if (action === "signal") {
-      if (!(await isApproved(id))) return res.status(403).json({ status: "error", message: "Device not approved" });
+      if (!(await isApproved(id))) {
+        return res.status(403).json({ status: "error", message: "Device not approved" });
+      }
 
       const pair = String(q.pair || "").toLowerCase();
       const tf = String(q.tf || "").toUpperCase();
@@ -147,9 +168,10 @@ module.exports = async (req, res) => {
       }
     }
 
-    /* default: approval check -> "R" / "N" */
+    /* Default: Approval Check -> Returns "R" if active, otherwise "N" */
     const ok = await isApproved(id);
     return sendText(res, 200, ok ? "R" : "N");
+
   } catch (err) {
     console.error("Handler error:", err);
     return res.status(500).json({ status: "error", message: err.message || "Internal server error" });
