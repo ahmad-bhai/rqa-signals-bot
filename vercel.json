@@ -1,6 +1,7 @@
 {
-  "version": 2,
-  "functions": { "api/backend.js": { "maxDuration": 15 } },
+  "functions": {
+    "api/backend.js": { "maxDuration": 15 }
+  },
   "rewrites": [
     { "source": "/r", "destination": "/api/backend.js" },
     { "source": "/api/r.js", "destination": "/api/backend.js" }
