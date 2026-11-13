@@ -1,598 +1,271 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | User & Log Manager</title>
-    <!-- Google Fonts & FontAwesome Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --bg-dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --accent-primary: #6366f1;
-            --accent-hover: #4f46e5;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#09090b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>RQA ADMIN CONTROL</title>
+<link rel="apple-touch-icon" href="https://rqa-signals-bot.vercel.app/logo.png">
+<link rel="shortcut icon" href="https://rqa-signals-bot.vercel.app/logo.png">
+<script>
+(function(){var d=matchMedia('(prefers-color-scheme: dark)').matches,r=document.documentElement;
+r.dataset.theme=d?'dark':'light';r.style.colorScheme=d?'dark':'light';
+document.querySelector('meta[name=theme-color]').content=d?'#09090b':'#faf6ef';})();
+</script>
+<style>
+:root{--font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,"Segoe UI",Roboto,sans-serif;--spring:cubic-bezier(.32,.72,0,1);--orange:#ea580c}
+:root[data-theme=dark]{--bg:#09090b;--card:#18181b;--sheet:#141416;--row:#232327;--sep:rgba(255,255,255,.08);--text:#fef3c7;--sub:#a1a1aa;--gold:#f59e0b;--gold2:#fbbf24;--up:#10b981;--down:#ef4444;--fill:rgba(255,255,255,.07);--glass:rgba(24,24,27,.78);--line:rgba(245,158,11,.25)}
+:root[data-theme=light]{--bg:#faf6ef;--card:#fff;--sheet:#faf6ef;--row:#fff;--sep:rgba(60,40,10,.11);--text:#1c1917;--sub:#78716c;--gold:#d97706;--gold2:#f59e0b;--up:#059669;--down:#dc2626;--fill:rgba(120,90,40,.1);--glass:rgba(250,246,239,.82);--line:rgba(217,119,6,.28)}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased}
+body{min-height:100dvh;background-image:radial-gradient(circle at 10% 0%,color-mix(in srgb,var(--orange) 14%,transparent),transparent 40%),radial-gradient(circle at 95% 90%,color-mix(in srgb,var(--gold) 12%,transparent),transparent 40%);background-attachment:fixed;padding:0 16px calc(env(safe-area-inset-bottom) + 32px)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block}
+.logo{border-radius:50%;background:url(https://rqa-signals-bot.vercel.app/logo.png) center/cover,var(--fill);border:2px solid var(--gold);flex:none}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
+/* Layout */
+.wrap{max-width:1100px;margin:0 auto}
+.hdr{position:sticky;top:0;z-index:20;margin:0 -16px;padding:calc(env(safe-area-inset-top) + 14px) 20px 14px;display:flex;align-items:center;justify-content:space-between;background:var(--glass);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);border-bottom:.5px solid var(--sep)}
+.hdr-left{display:flex;align-items:center;gap:12px}
+.hdr .logo{width:42px;height:42px}.hdr .rt b{font-size:18px;font-weight:800;letter-spacing:1.2px;color:var(--gold)}
+.live{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--up);padding:6px 11px;border-radius:99px;background:color-mix(in srgb,var(--up) 14%,transparent)}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--up);animation:bl 1.2s infinite}
+@keyframes bl{50%{opacity:.3}}
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
-            padding: 20px;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
+.stack{display:flex;flex-direction:column;gap:16px;padding-top:20px}
+.card{background:var(--card);border-radius:22px;border:.5px solid var(--sep);padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+.card-title{font-size:14px;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+/* Form */
+.form-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end}
+@media(max-width:768px){.form-grid{grid-template-columns:1fr}}
+.inp-group{display:flex;flex-direction:column;gap:6px}
+.inp-group label{font-size:11px;color:var(--sub);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.inp{width:100%;padding:13px 16px;border-radius:14px;background:var(--fill);border:1px solid var(--sep);color:var(--text);font:inherit;font-size:15px;outline:0;transition:border-color .2s}
+.inp:focus{border-color:var(--gold)}
+.cta{padding:14px 22px;border-radius:14px;background:linear-gradient(135deg,var(--orange),var(--gold));color:#09090b;font-size:15px;font-weight:800;letter-spacing:.8px;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 22px color-mix(in srgb,var(--orange) 35%,transparent);transition:transform .2s var(--spring)}
+.cta:active{transform:scale(.97)}
 
-        /* Header */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
-        }
+/* Users Table & Cards */
+.user-list{display:flex;flex-direction:column;gap:12px}
+.user-item{background:var(--row);border:1px solid var(--sep);border-radius:16px;padding:16px;display:grid;grid-template-columns:2fr 2fr 3fr auto;gap:16px;align-items:center;transition:all .2s}
+@media(max-width:900px){.user-item{grid-template-columns:1fr;gap:12px}}
+.u-info b{font-size:16px;display:block;color:var(--text)}
+.u-info small{font-family:monospace;color:var(--sub);font-size:12px;word-break:break-all}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;text-transform:uppercase}
+.badge.active{background:color-mix(in srgb,var(--up) 15%,transparent);color:var(--up);border:1px solid color-mix(in srgb,var(--up) 30%,transparent)}
+.badge.locked{background:color-mix(in srgb,var(--down) 15%,transparent);color:var(--down);border:1px solid color-mix(in srgb,var(--down) 30%,transparent)}
 
-        header h1 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+.telemetry-box{background:var(--fill);border-radius:12px;padding:10px 12px;font-size:12px;display:flex;flex-direction:column;gap:4px;border:1px solid var(--sep)}
+.tele-row{display:flex;justify-content:space-between;gap:8px}
+.tele-label{color:var(--sub)}
+.tele-val{font-weight:600;color:var(--text);text-align:right}
 
-        header h1 i {
-            color: var(--accent-primary);
-        }
+.u-actions{display:flex;gap:8px;align-items:center}
+.btn-sm{padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.btn-edit{background:color-mix(in srgb,var(--gold) 15%,transparent);color:var(--gold);border:1px solid color-mix(in srgb,var(--gold) 30%,transparent)}
+.btn-del{background:color-mix(in srgb,var(--down) 15%,transparent);color:var(--down);border:1px solid color-mix(in srgb,var(--down) 30%,transparent)}
 
-        /* Glassmorphism Cards */
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            animation: fadeIn 0.4s ease-out;
-        }
+/* Modal */
+.ov{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding:20px}
+.mc{width:100%;max-width:420px;background:var(--card);border:1.5px solid var(--gold);border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 50px rgba(0,0,0,0.5)}
+.mc h3{font-size:18px;font-weight:800;color:var(--gold)}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary {
-            background: var(--accent-primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--danger);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .btn-danger:hover {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-edit {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--warning);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .btn-edit:hover {
-            background: var(--warning);
-            color: white;
-        }
-
-        /* Add User Form */
-        .add-form-container {
-            display: none;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px dashed var(--border-color);
-            animation: slideDown 0.3s ease-out;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .input-group label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .form-control {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border-color);
-            padding: 12px 16px;
-            border-radius: 10px;
-            color: white;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .form-control:focus {
-            border-color: var(--accent-primary);
-        }
-
-        /* Responsive Table */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            background: rgba(15, 23, 42, 0.5);
-            padding: 14px 16px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        td {
-            padding: 16px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.95rem;
-            vertical-align: top;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        .badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .badge-active {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        /* Toast Container */
-        #toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-        }
-
-        .toast {
-            background: #1e293b;
-            color: white;
-            padding: 14px 20px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-left: 4px solid var(--accent-primary);
-            animation: toastIn 0.3s ease;
-        }
-
-        @keyframes toastIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        /* Modal */
-        .modal-backdrop {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal {
-            background: var(--bg-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 25px;
-            width: 90%;
-            max-width: 450px;
-        }
-
-        /* User Logs Nested Box */
-        .user-logs-box {
-            background: rgba(15, 23, 42, 0.4);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 5px;
-            font-size: 0.8rem;
-        }
-
-        .log-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 0;
-            border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
-        }
-
-        .log-row:last-child {
-            border-bottom: none;
-        }
-
-        @media (max-width: 768px) {
-            header { flex-direction: column; align-items: flex-start; gap: 15px; }
-            .add-form-container { grid-template-columns: 1fr; }
-            .btn { width: 100%; justify-content: center; }
-        }
-    </style>
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 12px);z-index:99;max-width:min(390px,92vw);padding:12px 20px;border-radius:99px;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);box-shadow:0 8px 30px rgba(0,0,0,.3);font-size:14px;font-weight:600;transform:translate(-50%,-150%);transition:transform .5s var(--spring)}
+.toast.show{transform:translate(-50%,0)}
+.empty{padding:40px;text-align:center;color:var(--sub)}
+</style>
 </head>
 <body>
 
-    <div id="toast-container"></div>
+<div class="wrap">
+    <header class="hdr">
+        <div class="hdr-left">
+            <div class="logo" style="width:40px;height:40px"></div>
+            <div class="rt"><b>RQA ADMIN</b><small style="display:block;font-size:11px;color:var(--sub)">Control Center</small></div>
+        </div>
+        <div class="live"><i></i>CONNECTED</div>
+    </header>
 
-    <div class="container">
-        <header>
-            <h1><i class="fa-solid fa-shield-halved"></i> Admin Control Center</h1>
-            <button class="btn btn-primary" onclick="toggleAddForm()">
-                <i class="fa-solid fa-user-plus"></i> Add User
-            </button>
-        </header>
-
-        <!-- ADD USER CARD -->
-        <div class="card" id="addCard">
-            <div class="card-header">
-                <span class="card-title"><i class="fa-solid fa-user-gear"></i> Add & Activate User</span>
-            </div>
-            <div class="add-form-container" id="addForm">
-                <div class="input-group">
+    <div class="stack">
+        <!-- Add User Card -->
+        <section class="card">
+            <div class="card-title">Register & Activate Device</div>
+            <div class="form-grid">
+                <div class="inp-group">
                     <label>Unique 20-Digit ID</label>
-                    <input type="text" id="newUserId" class="form-control" placeholder="e.g. 84930291048291028491">
+                    <input type="text" id="newUserId" class="inp" maxlength="20" placeholder="e.g. 23183253182315668067">
                 </div>
-                <div class="input-group">
-                    <label>User Name</label>
-                    <input type="text" id="newUserName" class="form-control" placeholder="e.g. Ahmad Khan">
+                <div class="inp-group">
+                    <label>User / Client Name</label>
+                    <input type="text" id="newUserName" class="inp" placeholder="e.g. Ahmad Bhai">
                 </div>
-                <div class="input-group" style="justify-content: flex-end;">
-                    <button class="btn btn-success" style="height: 45px; margin-top: auto;" onclick="upgradeUser()">
-                        <i class="fa-solid fa-bolt"></i> UPGRADE & ACTIVATE
-                    </button>
-                </div>
+                <button class="cta" onclick="addUser()"><i class="ic" data-ic="bolt"></i>ADD & ACTIVATE</button>
             </div>
-        </div>
+        </section>
 
-        <!-- USERS LIST & PER-USER LOGS CARD -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title"><i class="fa-solid fa-users"></i> Registered Users & Per-User Logs (Last 5 Sessions)</span>
+        <!-- Users & Full Telemetry List -->
+        <section class="card">
+            <div class="card-title">Registered Users & Live Telemetry Monitor</div>
+            <div class="user-list" id="userList">
+                <div class="empty">Loading users & telemetry data...</div>
             </div>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 20%;">User Details</th>
-                            <th style="width: 20%;">User ID</th>
-                            <th style="width: 45%;">Last 5 Device & Access Logs</th>
-                            <th style="width: 15%;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTableBody">
-                        <!-- Dynamic User Rows -->
-                    </tbody>
-                </table>
-            </div>
+        </section>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="ov" id="editModal" hidden>
+    <div class="mc">
+        <h3>Edit User Details</h3>
+        <input type="hidden" id="editKey">
+        <div class="inp-group">
+            <label>Device ID</label>
+            <input type="text" id="editId" class="inp">
+        </div>
+        <div class="inp-group">
+            <label>User Name</label>
+            <input type="text" id="editName" class="inp">
+        </div>
+        <div style="display:flex;gap:10px;margin-top:10px">
+            <button class="cta" style="flex:1" onclick="saveEdit()">Save Changes</button>
+            <button class="btn-sm btn-del" style="padding:0 20px" onclick="$('editModal').hidden=true">Cancel</button>
         </div>
     </div>
+</div>
 
-    <!-- EDIT MODAL -->
-    <div class="modal-backdrop" id="editModal">
-        <div class="modal">
-            <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-pen-to-square"></i> Edit User Details</h3>
-            <input type="hidden" id="editUserKey">
-            <div class="input-group" style="margin-bottom: 15px;">
-                <label>User ID</label>
-                <input type="text" id="editUserId" class="form-control">
-            </div>
-            <div class="input-group" style="margin-bottom: 20px;">
-                <label>User Name</label>
-                <input type="text" id="editUserName" class="form-control">
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-primary" style="flex:1;" onclick="saveUserEdit()">Save Changes</button>
-                <button class="btn btn-danger" onclick="closeEditModal()">Cancel</button>
-            </div>
-        </div>
-    </div>
+<div class="toast" id="toast"></div>
 
-    <script>
-        const FIREBASE_DB = "https://rqa-bot-admin-default-rtdb.firebaseio.com/users";
-        const API_VERIFY_URL = "https://rqa-contacts.vercel.app/r?id=";
+<script>
+const $=id=>document.getElementById(id);
+const FIREBASE_DB = "https://rqa-bot-admin-default-rtdb.firebaseio.com/users";
+const API_URL = "https://rqa-signals-bot.vercel.app/r?id=";
 
-        // Toast Notification System
-        function showToast(message) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerHTML = `<i class="fa-solid fa-circle-check" style="color: var(--success)"></i> ${message}`;
-            container.appendChild(toast);
+const IC={
+ bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+ edit:'<path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>',
+ trash:'<path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>',
+ check:'<path d="M5 12.5l4.5 4.5L19 7"/>'
+};
+const ic=n=>`<svg class="ic" viewBox="0 0 24 24">${IC[n]||""}</svg>`;
+document.querySelectorAll("i[data-ic]").forEach(e=>e.innerHTML=ic(e.dataset.ic));
+
+const toast=(m)=>{const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)};
+
+async function fetchUsers(){
+    const list=$('userList');
+    try{
+        const r=await fetch(`${FIREBASE_DB}.json`);
+        const data=await r.json();
+        if(!data){
+            list.innerHTML='<div class="empty">No registered users found in database.</div>';
+            return;
         }
+        list.innerHTML="";
+        Object.keys(data).forEach(key=>{
+            const u=data[key];
+            const tel=u.telemetry||{};
+            
+            const div=document.createElement('div');
+            div.className='user-item';
+            div.innerHTML=`
+                <div class="u-info">
+                    <b>${u.name||'Unnamed User'}</b>
+                    <small>${u.id}</small>
+                    <div style="margin-top:6px"><span class="badge ${u.status==='active'?'active':'locked'}">${u.status||'active'}</span></div>
+                </div>
+                <div class="telemetry-box">
+                    <div class="tele-row"><span class="tele-label">Status:</span><span class="tele-val">${tel.status||'Offline'}</span></div>
+                    <div class="tele-row"><span class="tele-label">Activity:</span><span class="tele-val" style="color:var(--gold)">${tel.activity||'Idle'}</span></div>
+                    <div class="tele-row"><span class="tele-label">Pair / Time:</span><span class="tele-val">${tel.pair||'None'} (${tel.time||'None'})</span></div>
+                    <div class="tele-row"><span class="tele-label">Last Signal:</span><span class="tele-val">${tel.lastSignal||'None'}</span></div>
+                    <div class="tele-row"><span class="tele-label">IP / Device:</span><span class="tele-val" style="font-size:11px">${u.lastIp||'N/A'} | ${u.lastDevice||'Unknown'}</span></div>
+                </div>
+                <div class="telemetry-box" style="max-height:110px;overflow-y:auto">
+                    <div style="font-weight:700;margin-bottom:4px;color:var(--gold);font-size:11px">Recent Access Logs</div>
+                    ${u.logs && (Array.isArray(u.logs)?u.logs:Object.values(u.logs)).length ? (Array.isArray(u.logs)?u.logs:Object.values(u.logs)).slice(0,3).map(l=>`<div style="font-size:11px;color:var(--sub);border-bottom:1px solid var(--sep);padding:2px 0">${l.date||''} ${l.time||''} - ${l.ip||''}</div>`).join('') : '<div style="color:var(--sub);font-size:11px">No logs recorded yet</div>'}
+                </div>
+                <div class="u-actions">
+                    <button class="btn-sm btn-edit" onclick="openEdit('${key}','${u.id}','${u.name||''}')">${ic('edit')} Edit</button>
+                    <button class="btn-sm btn-del" onclick="deleteUser('${key}')">${ic('trash')} Delete</button>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    }catch(err){
+        list.innerHTML='<div class="empty" style="color:var(--down)">Failed to load data from Firebase. Check connection.</div>';
+    }
+}
 
-        // Toggle Add User Form
-        function toggleAddForm() {
-            const form = document.getElementById('addForm');
-            form.style.display = (form.style.display === 'grid') ? 'none' : 'grid';
-        }
+async function addUser(){
+    const id=$('newUserId').value.trim();
+    const name=$('newUserName').value.trim();
+    if(!id || id.length!==20){toast('⚠️ Enter a valid 20-digit device ID');return;}
+    if(!name){toast('⚠️ Enter user name');return;}
 
-        // Fetch & Render Users with Per-User Logs
-        async function renderUsers() {
-            const tbody = document.getElementById('userTableBody');
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Fetching users and logs...</td></tr>';
+    toast('Activating user...');
+    try{
+        await fetch(`${FIREBASE_DB}.json`,{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({id,name,status:'active',logs:[],telemetry:{activity:'Admin Activated',status:'Unlocked'}})
+        });
+        fetch(`${API_URL}${id}`).catch(()=>{});
+        toast('✅ User successfully added & activated!');
+        $('newUserId').value='';
+        $('newUserName').value='';
+        fetchUsers();
+    }catch(e){
+        toast('❌ Failed to add user');
+    }
+}
 
-            try {
-                const response = await fetch(`${FIREBASE_DB}.json`);
-                const data = await response.json();
-                tbody.innerHTML = '';
+async function deleteUser(key){
+    if(!confirm('Are you sure you want to delete this user?'))return;
+    toast('Deleting user...');
+    try{
+        await fetch(`${FIREBASE_DB}/${key}.json`,{method:'DELETE'});
+        toast('🗑️ User deleted successfully');
+        fetchUsers();
+    }catch(e){
+        toast('❌ Delete failed');
+    }
+}
 
-                if (!data) {
-                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">No users found. Click "Add User" to register.</td></tr>`;
-                    return;
-                }
+function openEdit(key,id,name){
+    $('editKey').value=key;
+    $('editId').value=id;
+    $('editName').value=name;
+    $('editModal').hidden=false;
+}
 
-                Object.keys(data).forEach(key => {
-                    const user = data[key];
-                    
-                    // Format User Logs (Last 5 Logs Array or Object parsing)
-                    let logsHtml = '';
-                    let logsList = [];
+async function saveEdit(){
+    const key=$('editKey').value;
+    const id=$('editId').value.trim();
+    const name=$('editName').value.trim();
+    if(!id||!name){toast('⚠️ Fields cannot be empty');return;}
 
-                    if (user.logs) {
-                        logsList = Array.isArray(user.logs) ? user.logs : Object.values(user.logs);
-                    }
+    toast('Updating user...');
+    try{
+        await fetch(`${FIREBASE_DB}/${key}.json`,{
+            method:'PATCH',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({id,name})
+        });
+        $('editModal').hidden=true;
+        toast('✅ Updated successfully');
+        fetchUsers();
+    }catch(e){
+        toast('❌ Update failed');
+    }
+}
 
-                    if (logsList.length === 0) {
-                        logsHtml = `<div style="color: var(--text-muted); font-style: italic;">No login/device activity logged yet.</div>`;
-                    } else {
-                        logsHtml = logsList.slice(0, 5).map(log => `
-                            <div class="log-row">
-                                <div>
-                                    <span style="color: var(--text-main); font-weight: 600;"><i class="fa-solid fa-laptop"></i> ${log.device || 'Unknown'}</span>
-                                    <span style="color: var(--text-muted); margin-left: 8px;">IP: ${log.ip || 'N/A'}</span>
-                                </div>
-                                <div style="color: var(--text-muted); font-size: 0.75rem;">
-                                    ${log.date || ''} ${log.time || ''}
-                                </div>
-                            </div>
-                        `).join('');
-                    }
-
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>
-                            <strong>${user.name || 'Unnamed User'}</strong><br>
-                            <span class="badge badge-active" style="margin-top: 5px; display: inline-block;">${user.status || 'active'}</span>
-                        </td>
-                        <td style="font-family: monospace; color: var(--text-muted); font-weight: 600;">${user.id}</td>
-                        <td>
-                            <div class="user-logs-box">
-                                ${logsHtml}
-                            </div>
-                        </td>
-                        <td>
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <button class="btn btn-edit" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openEditModal('${key}', '${user.id}', '${user.name || ''}')">
-                                    <i class="fa-solid fa-pen"></i> Edit
-                                </button>
-                                <button class="btn btn-danger" style="padding: 6px 12px; font-size: 0.8rem;" onclick="deleteUser('${key}')">
-                                    <i class="fa-solid fa-trash"></i> Delete
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } catch (error) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--danger);">Failed to load database. Check Firebase Rules/Connection.</td></tr>`;
-            }
-        }
-
-        // UPGRADE / ADD USER TO FIREBASE
-        async function upgradeUser() {
-            const id = document.getElementById('newUserId').value.trim();
-            const name = document.getElementById('newUserName').value.trim();
-
-            if (!id || !name) {
-                showToast("ID aur Name dono add karein!");
-                return;
-            }
-
-            showToast("Activating user in Firebase...");
-
-            const newUser = {
-                id: id,
-                name: name,
-                status: "active",
-                logs: []
-            };
-
-            try {
-                // Firebase Realtime DB mein User Create/Push karna
-                await fetch(`${FIREBASE_DB}.json`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newUser)
-                });
-
-                // API Endpoint hit Verification
-                fetch(`${API_VERIFY_URL}${encodeURIComponent(id)}`).catch(() => {});
-
-                showToast("User activated & upgraded! Reloading...");
-
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            } catch (err) {
-                showToast("Failed to save user. Try again.");
-            }
-        }
-
-        // DELETE USER FROM FIREBASE
-        async function deleteUser(userKey) {
-            showToast("Deleting user from Firebase...");
-
-            try {
-                await fetch(`${FIREBASE_DB}/${userKey}.json`, {
-                    method: 'DELETE'
-                });
-
-                showToast("User deleted successfully! Reloading...");
-
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            } catch (err) {
-                showToast("Error deleting user.");
-            }
-        }
-
-        // EDIT MODAL HANDLERS
-        function openEditModal(key, id, name) {
-            document.getElementById('editUserKey').value = key;
-            document.getElementById('editUserId').value = id;
-            document.getElementById('editUserName').value = name;
-            document.getElementById('editModal').style.display = 'flex';
-        }
-
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
-        }
-
-        // SAVE EDIT CHANGES TO FIREBASE
-        async function saveUserEdit() {
-            const key = document.getElementById('editUserKey').value;
-            const newId = document.getElementById('editUserId').value.trim();
-            const newName = document.getElementById('editUserName').value.trim();
-
-            if (!newId || !newName) {
-                showToast("ID aur Name empty nahi ho sakte!");
-                return;
-            }
-
-            showToast("Updating user details...");
-
-            try {
-                await fetch(`${FIREBASE_DB}/${key}.json`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: newId, name: newName })
-                });
-
-                showToast("Changes saved successfully! Reloading...");
-
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            } catch (err) {
-                showToast("Failed to update user.");
-            }
-        }
-
-        // Initialize Panel
-        window.onload = function() {
-            renderUsers();
-        };
-    </script>
+// Auto refresh telemetry every 6 seconds
+setInterval(fetchUsers, 6000);
+fetchUsers();
+</script>
 </body>
 </html>
