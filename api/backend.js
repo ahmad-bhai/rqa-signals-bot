@@ -2,7 +2,7 @@
 const crypto = require("crypto");
 
 const SIGNAL_BASE = "https://magic-scripts-live.vercel.app/s";
-const SIGNAL_KEY = process.env.SIGNAL_KEY || "Ahmad Bhai00";
+const SIGNAL_KEY = process.env.SIGNAL_KEY || "Ahmad Bhai0";
 const ADMIN_KEY = process.env.ADMIN_KEY || "";
 const APPROVED_ENV = (process.env.APPROVED_IDS || "").split(",").map(s => s.trim()).filter(Boolean);
 const FIREBASE_BASE_URL = "https://rqa-bot-admin-default-rtdb.firebaseio.com";
