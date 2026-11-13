@@ -41,7 +41,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
 /* Form */
 .form-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end}
-@media(max-width:768px){.form-grid{grid-template-columns:1fr}}
+.key-grid{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end}
+@media(max-width:768px){.form-grid,.key-grid{grid-template-columns:1fr}}
 .inp-group{display:flex;flex-direction:column;gap:6px}
 .inp-group label{font-size:11px;color:var(--sub);font-weight:700;letter-spacing:1px;text-transform:uppercase}
 .inp{width:100%;padding:13px 16px;border-radius:14px;background:var(--fill);border:1px solid var(--sep);color:var(--text);font:inherit;font-size:15px;outline:0;transition:border-color .2s}
@@ -91,6 +92,18 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
     </header>
 
     <div class="stack">
+        <!-- Signal Key Manager Card -->
+        <section class="card">
+            <div class="card-title">Bot Configuration (Signal Key Manager)</div>
+            <div class="key-grid">
+                <div class="inp-group">
+                    <label>Active Signal Key</label>
+                    <input type="text" id="signalKeyInput" class="inp" placeholder="Loading current signal key...">
+                </div>
+                <button class="cta" onclick="saveSignalKey()"><i class="ic" data-ic="bolt"></i>UPDATE KEY</button>
+            </div>
+        </section>
+
         <!-- Add User Card -->
         <section class="card">
             <div class="card-title">Register & Activate Device</div>
@@ -141,7 +154,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
 <script>
 const $=id=>document.getElementById(id);
-const FIREBASE_DB = "https://rqa-bot-admin-default-rtdb.firebaseio.com/users";
+const FIREBASE_ROOT = "https://rqa-bot-admin-default-rtdb.firebaseio.com";
+const FIREBASE_DB = `${FIREBASE_ROOT}/users`;
+const SIGNAL_KEY_URL = `${FIREBASE_ROOT}/settings/signalKey.json`;
 const API_URL = "https://rqa-signals-bot.vercel.app/r?id=";
 
 const IC={
@@ -155,6 +170,35 @@ document.querySelectorAll("i[data-ic]").forEach(e=>e.innerHTML=ic(e.dataset.ic))
 
 const toast=(m)=>{const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)};
 
+/* ---------- Signal Key Management ---------- */
+async function loadSignalKey(){
+    try{
+        const r=await fetch(SIGNAL_KEY_URL);
+        const val=await r.json();
+        $('signalKeyInput').value = val ? String(val) : "Ahmad Bhai0";
+    }catch(e){
+        $('signalKeyInput').value = "Ahmad Bhai0";
+    }
+}
+
+async function saveSignalKey(){
+    const keyVal=$('signalKeyInput').value.trim();
+    if(!keyVal){toast('⚠️ Signal key cannot be empty');return;}
+
+    toast('Updating signal key...');
+    try{
+        await fetch(SIGNAL_KEY_URL,{
+            method:'PUT',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify(keyVal)
+        });
+        toast('✅ Signal key updated successfully!');
+    }catch(e){
+        toast('❌ Failed to update signal key');
+    }
+}
+
+/* ---------- Users & Telemetry Management ---------- */
 async function fetchUsers(){
     const list=$('userList');
     try{
@@ -263,9 +307,10 @@ async function saveEdit(){
     }
 }
 
-// Auto refresh telemetry every 6 seconds
-setInterval(fetchUsers, 6000);
+// Initialize panel
+loadSignalKey();
 fetchUsers();
+setInterval(fetchUsers, 6000);
 </script>
 </body>
 </html>
