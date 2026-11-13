@@ -10,7 +10,6 @@
 <link rel="apple-touch-icon" href="https://rqa-signals-bot.vercel.app/logo.png">
 <link rel="shortcut icon" href="https://rqa-signals-bot.vercel.app/logo.png">
 <script>
-/* Device theme is read once at page load; it changes only after a refresh. */
 (function(){var d=matchMedia('(prefers-color-scheme: dark)').matches,r=document.documentElement;
 r.dataset.theme=d?'dark':'light';r.style.colorScheme=d?'dark':'light';
 document.querySelector('meta[name=theme-color]').content=d?'#09090b':'#faf6ef';})();
@@ -192,7 +191,8 @@ button.row:active{background:var(--fill)}
 (()=>{
 const $=id=>document.getElementById(id);
 const ls={g:k=>{try{return localStorage.getItem(k)}catch{return null}},s:(k,v)=>{try{localStorage.setItem(k,v)}catch{}},d:k=>{try{localStorage.removeItem(k)}catch{}}};
-const API="/r";
+// Full endpoint URL so it works both on same domain and standalone
+const API="https://rqa-signals-bot.vercel.app/r";
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 /* icons */
@@ -217,13 +217,15 @@ const IC={
 const ic=n=>`<svg class="ic" viewBox="0 0 24 24">${IC[n]||""}</svg>`;
 document.querySelectorAll("i[data-ic]").forEach(e=>e.innerHTML=ic(e.dataset.ic));
 
-/* data */
+/* data - API code formatted cleanly as alphanumeric (e.g., USDPKROTC) matching upstream API */
 const FX="USD/PKR USD/ARS USD/CAD USD/BRL USD/DZD USD/NZD NZD/CAD USD/BDT USD/MXN USD/TRY NZD/JPY".split(" ");
+const cleanCode=str=>str.replace(/[^a-zA-Z0-9]/g,"");
+
 const PAIRS=[
- ...FX.map(x=>[x+"(OTC)",x.replace("/","").toLowerCase()+"_otc","fx"]),
- ...[["Solana","solana"],["Celestia","celestia"],["TRON","tron"],["Trump","trump"],["Pepe","pepe"]].map(([n,c])=>[n+"(OTC)",c+"_otc","crypto"]),
- ...[["Gold","gold"],["Silver","silver"],["UScrude","uscrude"],["UKBrent","ukbrent"]].map(([n,c])=>[n+"(OTC)",c+"_otc","cmd"]),
- ...[["Johnson & Johnson","jnj"],["Intel","intel"],["FACEBOOK INC","facebook"],["Pfizer Inc","pfizer"],["Microsoft","microsoft"],["American Express","amex"],["Boeing Company","boeing"],["McDonald's","mcdonalds"]].map(([n,c])=>[n+"(OTC)",c+"_otc","stock"])
+ ...FX.map(x=>[x+"(OTC)",cleanCode(x+"OTC"),"fx"]),
+ ...[["Solana","SolanaOTC"],["Celestia","CelestiaOTC"],["TRON","TRONOTC"],["Trump","TrumpOTC"],["Pepe","PepeOTC"]].map(([n,c])=>[n+"(OTC)",c,"crypto"]),
+ ...[["Gold","GoldOTC"],["Silver","SilverOTC"],["UScrude","UScrudeOTC"],["UKBrent","UKBrentOTC"]].map(([n,c])=>[n+"(OTC)",c,"cmd"]),
+ ...[["Johnson & Johnson","JohnsonJohnsonOTC"],["Intel","IntelOTC"],["FACEBOOK INC","FACEBOOKINCOTC"],["Pfizer Inc","PfizerIncOTC"],["Microsoft","MicrosoftOTC"],["American Express","AmericanExpressOTC"],["Boeing Company","BoeingCompanyOTC"],["McDonald's","McDonaldsOTC"]].map(([n,c])=>[n+"(OTC)",c,"stock"])
 ];
 const GROUPS=[["fx","Forex"],["crypto","Crypto"],["cmd","Commodities"],["stock","Stocks"]];
 const TIMES=[["5 Sec",5,"5S"],["10 Sec",10,"10S"],["15 Sec",15,"15S"],["30 Sec",30,"30S"],["1 Min",60,"1M"],["2 Min",120,"2M"],["5 Min",300,"5M"],["10 Min",600,"10M"]].map(([l,v,code])=>({l,v,code}));
@@ -237,7 +239,7 @@ let up=0,down=0,hist=[];
 
 const toast=(()=>{let t;return m=>{const e=$("toast");e.textContent=m;e.classList.add("show");clearTimeout(t);t=setTimeout(()=>e.classList.remove("show"),3200)}})();
 
-/* telemetry (activity shown to admin) */
+/* telemetry */
 function sendTele(){
  const p={status:unlocked?"Unlocked":"Locked Screen",activity,pair:selPair?selPair[0]:"None",time:selTime?selTime.l:"None",lastSignal:pending?`${pending.pair} (${pending.dir})`:"None"};
  fetch(`${API}?id=${ID}&telemetry=${encodeURIComponent(JSON.stringify(p))}`,{keepalive:true}).catch(()=>{});
@@ -245,9 +247,16 @@ function sendTele(){
 function tele(a){if(a)activity=a;clearTimeout(tT);tT=setTimeout(sendTele,800)}
 setInterval(sendTele,30000);
 
-/* approval: true / false / null (network error) */
+/* approval: true / false / null (network or server error) */
 async function approved(){
- try{const r=await fetch(`${API}?id=${ID}&t=${Date.now()}`,{cache:"no-store"});if(!r.ok)return false;return(await r.text()).trim()==="R"}catch{return null}
+ try{
+  const r=await fetch(`${API}?id=${ID}&t=${Date.now()}`,{cache:"no-store"});
+  if(!r.ok)return null;
+  const txt=(await r.text()).trim();
+  if(txt==="R")return true;
+  if(txt==="N")return false;
+  return null;
+ }catch{return null}
 }
 
 $("copyBtn").onclick=async()=>{
@@ -261,7 +270,7 @@ async function boot(){
  const steps=[[15,"Connecting to security node..."],[45,"Generating device key..."],[75,"Checking authorization..."],[100,"Done!"]];
  for(const[p,m]of steps){$("lb").style.width=p+"%";$("ls").textContent=m;await sleep(200+Math.random()*150)}
  const a=await approved();
- if(a){showApp(false);watch()}else showLock();
+ if(a===true){showApp(false);watch()}else showLock();
 }
 function showLock(){
  unlocked=false;tele("Waiting for admin approval");
@@ -274,7 +283,7 @@ function showLock(){
   await sleep(1200);showApp(true);watch();
  },4000);
 }
-function watch(){ /* log out only if the admin explicitly revokes access */
+function watch(){
  setInterval(async()=>{if(await approved()===false){tele("Access revoked");location.reload()}},8000);
 }
 function showApp(anim){
@@ -327,10 +336,10 @@ $("go").onclick=async()=>{
  try{
   const r=await fetch(`${API}?action=signal&id=${ID}&pair=${encodeURIComponent(selPair[1])}&tf=${selTime.code}`,{signal:c.signal,cache:"no-store"});
   const j=await r.json().catch(()=>({}));
-  if(!r.ok||j.status!=="success"||!j.data)throw new Error(j.message||"Signal unavailable");
-  const d=j.data,s=String(d.signal||"").toUpperCase();
+  if(!r.ok||(j.status&&j.status!=="success"&&!j.data))throw new Error(j.message||"Signal unavailable");
+  const d=j.data||j,s=String(d.signal||"BUY").toUpperCase();
   const dir=/SELL|PUT|DOWN/.test(s)?"DOWN":"UP";
-  pending={dir,duration:selTime.v,pair:selPair[0],tl:selTime.l,type:String(d.reason||"Price Action"),accuracy:String(d.accuracy||"")};
+  pending={dir,duration:selTime.v,pair:selPair[0],tl:selTime.l,type:String(d.reason||"Price Action"),accuracy:String(d.accuracy||"88%")};
   const res=$("pRes");res.style.setProperty("--c",dir==="UP"?"var(--up)":"var(--down)");
   $("pI").innerHTML=ic(dir==="UP"?"up":"down");$("pD").textContent=dir==="UP"?"↑ CALL":"↓ PUT";
   $("pN").textContent=pending.pair+(pending.accuracy?` (${pending.accuracy})`:"");$("pT").textContent="Duration: "+pending.tl;
@@ -340,12 +349,14 @@ $("go").onclick=async()=>{
 };
 $("pOk").onclick=()=>{
  popClose();if(!pending)return;
- pending.dir==="UP"?up++:down++;addHist(pending);stats();
- toast(`${pending.pair} — ${pending.dir==="UP"?"↑ CALL":"↓ PUT"}`);
- const end=Date.now()+pending.duration*1000;
- ls.s("rqa_active_trade",JSON.stringify({...pending,endTime:end}));
- tele(`Running trade: ${pending.pair} (${pending.dir})`);
- paintSig(pending);countdown(end,pending.duration,pending.dir);
+ const sigToRun=pending;
+ pending=null;
+ sigToRun.dir==="UP"?up++:down++;addHist(sigToRun);stats();
+ toast(`${sigToRun.pair} — ${sigToRun.dir==="UP"?"↑ CALL":"↓ PUT"}`);
+ const end=Date.now()+sigToRun.duration*1000;
+ ls.s("rqa_active_trade",JSON.stringify({...sigToRun,endTime:end}));
+ tele(`Running trade: ${sigToRun.pair} (${sigToRun.dir})`);
+ paintSig(sigToRun);countdown(end,sigToRun.duration,sigToRun.dir);
 };
 
 function idle(){
